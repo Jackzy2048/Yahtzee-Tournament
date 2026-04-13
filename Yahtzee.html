@@ -1,0 +1,858 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.4">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1">&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1">&lt;meta name="theme-color" id="theme-color-meta" content="#0d0d1a"&gt;</p>
+<p class="p1">&lt;meta name="apple-mobile-web-app-capable" content="yes"&gt;</p>
+<p class="p1">&lt;meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"&gt;</p>
+<p class="p1">&lt;meta name="apple-mobile-web-app-title" content="Yahtzee"&gt;</p>
+<p class="p1">&lt;title&gt;Yahtzee Tournament&lt;/title&gt;</p>
+<p class="p1">&lt;link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Yahtzee%20Tournament%22%2C%22short_name%22%3A%22Yahtzee%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%220d0d1a%22%2C%22theme_color%22%3A%220d0d1a%22%2C%22icons%22%3A%5B%5D%7D"&gt;</p>
+<p class="p1">&lt;style&gt;</p>
+<p class="p1">:root{--bg:#0d0d1a;--bg2:#12121f;--bg3:#1a1a2e;--surface:#181828;--surface2:#1e1e32;--surface3:#242440;--ga:#e94560;--gb:#a855f7;--gc:#3b82f6;--gold:#fbbf24;--silver:#94a3b8;--bronze:#b45309;--text:#f0f0fa;--text2:#8b8baa;--text3:#5a5a7a;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--fire:#f97316;--green:#4ade80;--r:16px;--rsm:10px;--rxs:6px;--grd:linear-gradient(135deg,var(--ga),var(--gb));--grd3:linear-gradient(135deg,#fbbf24,#f97316);--danger-bg:rgba(233,69,96,.1);--danger-border:rgba(233,69,96,.2);}</p>
+<p class="p1">body.light{--bg:#f4f4fb;--bg2:#fff;--bg3:#ededf8;--surface:#fff;--surface2:#f7f7fd;--surface3:#eeeefc;--text:#111128;--text2:#5a5a7a;--text3:#9999bb;--border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);--gold:#b45309;--silver:#475569;--bronze:#92400e;}</p>
+<p class="p1">*{box-sizing:border-box;margin:0;padding:0;}</p>
+<p class="p1">body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;min-height:100vh;transition:background .35s,color .35s;overflow-x:hidden;}</p>
+<p class="p1">#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s,visibility .5s;}</p>
+<p class="p1">#loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}</p>
+<p class="p1">.loader-dice{font-size:72px;animation:diceSpin 1.2s cubic-bezier(.68,-.55,.27,1.55) infinite alternate;}</p>
+<p class="p1">@keyframes diceSpin{0%{transform:rotate(-20deg) scale(.9);}100%{transform:rotate(20deg) scale(1.1);}}</p>
+<p class="p1">.loader-title{font-size:28px;font-weight:800;background:var(--grd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-top:20px;}</p>
+<p class="p1">.loader-sub{font-size:14px;color:var(--text2);margin-top:8px;}</p>
+<p class="p1">.loader-dots{display:flex;gap:6px;margin-top:20px;}</p>
+<p class="p1">.loader-dot{width:8px;height:8px;border-radius:50%;background:var(--ga);animation:dotPulse 1.2s ease-in-out infinite;}</p>
+<p class="p1">.loader-dot:nth-child(2){background:var(--gb);animation-delay:.2s;}</p>
+<p class="p1">.loader-dot:nth-child(3){background:var(--gc);animation-delay:.4s;}</p>
+<p class="p1">@keyframes dotPulse{0%,100%{transform:scale(.7);opacity:.4;}50%{transform:scale(1.1);opacity:1;}}</p>
+<p class="p1">.bg-blob{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0;opacity:.18;}</p>
+<p class="p1">.blob1{width:400px;height:400px;background:var(--ga);top:-100px;right:-100px;}</p>
+<p class="p1">.blob2{width:350px;height:350px;background:var(--gb);bottom:-80px;left:-80px;}</p>
+<p class="p1">body.light .bg-blob{opacity:.06;}</p>
+<p class="p1">.nav{position:sticky;top:0;z-index:100;background:rgba(13,13,26,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border2);display:flex;}</p>
+<p class="p1">body.light .nav{background:rgba(255,255,255,.88);}</p>
+<p class="p1">.nav-btn{flex:1;padding:.65rem .1rem;background:none;border:none;color:var(--text2);font-size:10px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .22s;display:flex;flex-direction:column;align-items:center;gap:2px;}</p>
+<p class="p1">.nav-btn .ni{font-size:17px;transition:transform .2s;}</p>
+<p class="p1">.nav-btn.active{color:var(--ga);border-bottom-color:var(--ga);}</p>
+<p class="p1">.nav-btn.active .ni{transform:scale(1.15);}</p>
+<p class="p1">.page{display:none;padding:1rem 1rem 4rem;max-width:620px;margin:0 auto;position:relative;z-index:1;}</p>
+<p class="p1">.page.active{display:block;animation:pageIn .25s ease;}</p>
+<p class="p1">@keyframes pageIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}</p>
+<p class="p1">.pt{font-size:24px;font-weight:800;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;letter-spacing:-.4px;}</p>
+<p class="p1">.pt-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;background:var(--surface2);border:1px solid var(--border2);transition:all .18s;flex-shrink:0;}</p>
+<p class="p1">.pt-icon:hover{background:var(--surface3);}</p>
+<p class="p1">.pt-right{display:flex;gap:6px;align-items:center;}</p>
+<p class="p1">.card{background:var(--surface);border-radius:var(--r);padding:1.25rem;margin-bottom:.875rem;border:1px solid var(--border);position:relative;overflow:hidden;}</p>
+<p class="p1">.card::before{content:'';position:absolute;inset:0;border-radius:var(--r);background:linear-gradient(135deg,rgba(255,255,255,.03) 0%,transparent 60%);pointer-events:none;}</p>
+<p class="p1">.welcome-card{background:linear-gradient(135deg,rgba(233,69,96,.12),rgba(168,85,247,.12));border:1px solid rgba(233,69,96,.25);border-radius:var(--r);padding:1.4rem;margin-bottom:1rem;text-align:center;}</p>
+<p class="p1">.welcome-card .wc-icon{font-size:40px;margin-bottom:.6rem;}</p>
+<p class="p1">.welcome-card h2{font-size:18px;font-weight:800;margin-bottom:.4rem;}</p>
+<p class="p1">.welcome-card p{font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.6;}</p>
+<p class="p1">.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;}</p>
+<p class="p1">.sbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--rsm);padding:.8rem .4rem;text-align:center;position:relative;overflow:hidden;}</p>
+<p class="p1">.sbox::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grd);}</p>
+<p class="p1">.snum{font-size:18px;font-weight:800;letter-spacing:-.5px;}</p>
+<p class="p1">.slabel{font-size:9px;color:var(--text2);margin-top:3px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;}</p>
+<p class="p1">.monthly-card{background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(168,85,247,.1));border:1px solid rgba(59,130,246,.2);border-radius:var(--rsm);padding:1rem 1.1rem;margin-bottom:1rem;}</p>
+<p class="p1">.monthly-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gc);margin-bottom:.6rem;}</p>
+<p class="p1">.monthly-body{font-size:13px;color:var(--text);line-height:1.7;}</p>
+<p class="p1">.monthly-body strong{color:var(--gold);}</p>
+<p class="p1">.season-bar{display:flex;gap:6px;margin-bottom:1rem;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}</p>
+<p class="p1">.season-bar::-webkit-scrollbar{height:0;}</p>
+<p class="p1">.season-pill{padding:.38rem .85rem;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .18s;flex-shrink:0;}</p>
+<p class="p1">.season-pill.active{background:var(--grd);border-color:transparent;color:#fff;}</p>
+<p class="p1">.st{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--text3);margin-bottom:.85rem;}</p>
+<p class="p1">.lb-row{display:flex;align-items:center;gap:12px;padding:1rem 1rem 1rem 1.1rem;background:var(--surface);border-radius:var(--rsm);margin-bottom:.5rem;border:1px solid var(--border);position:relative;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s,box-shadow .2s;}</p>
+<p class="p1">.lb-row:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,0,0,.25);}</p>
+<p class="p1">.lb-row:active{transform:scale(.99);}</p>
+<p class="p1">.lb-tap-hint{position:absolute;right:8px;bottom:5px;font-size:10px;color:var(--text3);}</p>
+<p class="p1">.lb-bar{position:absolute;left:0;top:0;bottom:0;opacity:.05;pointer-events:none;}</p>
+<p class="p1">.lb-glow{position:absolute;top:0;left:0;right:0;height:1px;pointer-events:none;}</p>
+<p class="p1">.lb-rank{font-size:19px;width:26px;text-align:center;flex-shrink:0;}</p>
+<p class="p1">.lb-av{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--surface3);border-radius:50%;flex-shrink:0;font-size:19px;border:1.5px solid var(--border2);}</p>
+<p class="p1">.lb-info{flex:1;min-width:0;}</p>
+<p class="p1">.lb-name{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}</p>
+<p class="p1">.lb-sub{font-size:11px;color:var(--text2);margin-top:2px;}</p>
+<p class="p1">.lb-right{text-align:right;flex-shrink:0;padding-right:4px;}</p>
+<p class="p1">.lb-wins{font-size:22px;font-weight:800;color:var(--gold);letter-spacing:-.5px;}</p>
+<p class="p1">.lb-wlabel{font-size:10px;color:var(--text2);font-weight:600;letter-spacing:.5px;}</p>
+<p class="p1">.first-row{border-color:rgba(251,191,36,.2);}</p>
+<p class="p1">.first-row .lb-glow{background:linear-gradient(90deg,transparent,rgba(251,191,36,.3),transparent);}</p>
+<p class="p1">.bdgs{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}</p>
+<p class="p1">.badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700;}</p>
+<p class="p1">.bfire{background:rgba(249,115,22,.12);color:var(--fire);border:1px solid rgba(249,115,22,.2);}</p>
+<p class="p1">.byahtzee{background:rgba(251,191,36,.1);color:var(--gold);border:1px solid rgba(251,191,36,.2);}</p>
+<p class="p1">.bpodium{background:rgba(148,163,184,.1);color:var(--silver);border:1px solid rgba(148,163,184,.2);}</p>
+<p class="p1">.scr-wrap{background:linear-gradient(135deg,#0d0d1a,#1a0a2e);border-radius:20px;padding:1.5rem;width:100%;}</p>
+<p class="p1">.scr-header{text-align:center;margin-bottom:1.2rem;}</p>
+<p class="p1">.scr-title{font-size:22px;font-weight:800;background:linear-gradient(135deg,#e94560,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}</p>
+<p class="p1">.scr-sub{font-size:12px;color:#8b8baa;margin-top:4px;}</p>
+<p class="p1">.scr-row{display:flex;align-items:center;gap:10px;padding:.75rem .85rem;background:rgba(255,255,255,.05);border-radius:10px;margin-bottom:6px;border:1px solid rgba(255,255,255,.08);}</p>
+<p class="p1">.scr-rank{font-size:18px;width:26px;text-align:center;flex-shrink:0;}</p>
+<p class="p1">.scr-av{font-size:18px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border-radius:50%;flex-shrink:0;}</p>
+<p class="p1">.scr-name{flex:1;font-size:14px;font-weight:700;color:#f0f0fa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}</p>
+<p class="p1">.scr-stats{text-align:right;flex-shrink:0;}</p>
+<p class="p1">.scr-wins{font-size:18px;font-weight:800;color:#fbbf24;}</p>
+<p class="p1">.scr-avg{font-size:10px;color:#8b8baa;}</p>
+<p class="p1">.scr-footer{text-align:center;margin-top:.8rem;font-size:10px;color:#5a5a7a;}</p>
+<p class="p1">.player-item{display:flex;align-items:center;gap:12px;padding:.9rem 1rem;background:var(--surface);border-radius:var(--rsm);margin-bottom:.5rem;border:1px solid var(--border);transition:border-color .18s,transform .15s;}</p>
+<p class="p1">.player-item:hover{border-color:var(--border2);transform:translateY(-1px);}</p>
+<p class="p1">.pav{font-size:23px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:var(--surface3);border-radius:50%;flex-shrink:0;border:1.5px solid var(--border2);}</p>
+<p class="p1">.pname{font-weight:700;font-size:15px;}</p>
+<p class="p1">.pstats{font-size:11px;color:var(--text2);margin-top:2px;}</p>
+<p class="p1">.pacts{margin-left:auto;display:flex;gap:6px;}</p>
+<p class="p1">.btn{display:inline-flex;align-items:center;gap:6px;padding:.62rem 1.2rem;border-radius:var(--rsm);border:none;cursor:pointer;font-size:13px;font-weight:700;transition:all .15s;letter-spacing:.2px;}</p>
+<p class="p1">.btn:active{transform:scale(.97);}</p>
+<p class="p1">.btn-primary{background:var(--grd);color:#fff;box-shadow:0 4px 16px rgba(233,69,96,.3);}</p>
+<p class="p1">.btn-primary:hover{filter:brightness(1.07);}</p>
+<p class="p1">.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border2);}</p>
+<p class="p1">.btn-secondary:hover{background:var(--surface3);}</p>
+<p class="p1">.btn-sm{padding:.38rem .75rem;font-size:12px;}</p>
+<p class="p1">.btn-gold{background:var(--grd3);color:#1a0a00;box-shadow:0 4px 16px rgba(251,191,36,.25);}</p>
+<p class="p1">.btn-gold:hover{filter:brightness(1.07);}</p>
+<p class="p1">.btn-danger{background:var(--danger-bg);color:var(--ga);border:1px solid var(--danger-border);}</p>
+<p class="p1">.btn-danger:hover{background:rgba(233,69,96,.18);}</p>
+<p class="p1">.btn-full{width:100%;justify-content:center;}</p>
+<p class="p1">.btn-icon-circle{width:34px;height:34px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;font-size:15px;}</p>
+<p class="p1">input[type=text],input[type=number],input[type=date],textarea,select{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);padding:.7rem 1rem;font-size:15px;width:100%;outline:none;transition:border-color .2s,box-shadow .2s;font-family:inherit;}</p>
+<p class="p1">input:focus,textarea:focus,select:focus{border-color:var(--ga);box-shadow:0 0 0 3px rgba(233,69,96,.12);}</p>
+<p class="p1">textarea{resize:vertical;min-height:65px;}</p>
+<p class="p1">select{cursor:pointer;}</p>
+<p class="p1">label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;margin-top:14px;font-weight:600;letter-spacing:.3px;}</p>
+<p class="p1">label:first-child{margin-top:0;}</p>
+<p class="p1">.player-select-grid{display:flex;flex-direction:column;gap:8px;}</p>
+<p class="p1">.ps-row{display:flex;align-items:center;gap:12px;padding:.85rem 1rem;background:var(--surface2);border-radius:var(--rsm);border:1.5px solid var(--border);cursor:pointer;transition:all .18s;user-select:none;}</p>
+<p class="p1">.ps-row.selected{border-color:var(--ga);background:rgba(233,69,96,.07);}</p>
+<p class="p1">.ps-check{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border2);background:var(--surface3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:13px;}</p>
+<p class="p1">.ps-row.selected .ps-check{background:var(--grd);border-color:transparent;color:#fff;}</p>
+<p class="p1">.score-entry-row{background:var(--surface2);border-radius:var(--rsm);padding:.85rem 1rem;margin-bottom:8px;border:1px solid var(--border);}</p>
+<p class="p1">.ser-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}</p>
+<p class="p1">.ser-name{flex:1;font-size:14px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}</p>
+<p class="p1">.ser-total{font-size:20px;font-weight:800;min-width:44px;text-align:right;background:var(--grd3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0;}</p>
+<p class="p1">.ser-bd{display:grid;grid-template-columns:1fr 1fr;gap:8px;}</p>
+<p class="p1">.ser-sub{display:flex;flex-direction:column;gap:4px;}</p>
+<p class="p1">.ser-sublabel{font-size:11px;color:var(--text2);font-weight:600;}</p>
+<p class="p1">.ser-tip{font-size:10px;color:var(--text3);font-style:italic;}</p>
+<p class="p1">.ser-subinput{width:100%;font-size:14px;padding:.45rem .7rem;text-align:center;}</p>
+<p class="p1">.yctr{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}</p>
+<p class="p1">.yclabel{font-size:12px;color:var(--text2);flex:1;font-weight:600;}</p>
+<p class="p1">.ycbtn{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border2);background:var(--surface3);color:var(--text);font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1;transition:all .15s;}</p>
+<p class="p1">.ycbtn:hover,.ycbtn:active{background:var(--grd);border-color:transparent;color:#fff;}</p>
+<p class="p1">.ycbtn:active{transform:scale(.85);}</p>
+<p class="p1">.ycval{font-size:20px;font-weight:800;color:var(--gold);min-width:26px;text-align:center;}</p>
+<p class="p1">.step-indicator{display:flex;align-items:center;gap:6px;margin-bottom:1.25rem;}</p>
+<p class="p1">.step-dot{width:8px;height:8px;border-radius:50%;background:var(--surface3);transition:all .2s;}</p>
+<p class="p1">.step-dot.active{background:var(--grd);width:24px;border-radius:4px;}</p>
+<p class="p1">.step-dot.done{background:var(--green);}</p>
+<p class="p1">.step-label{font-size:12px;color:var(--text2);margin-left:4px;}</p>
+<p class="p1">.quick-start{display:flex;align-items:center;gap:10px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);border-radius:var(--rsm);padding:.9rem 1rem;margin-bottom:1rem;cursor:pointer;transition:all .18s;}</p>
+<p class="p1">.quick-start:hover{background:rgba(251,191,36,.12);}</p>
+<p class="p1">.qs-icon{font-size:22px;flex-shrink:0;}</p>
+<p class="p1">.qs-text{flex:1;}</p>
+<p class="p1">.qs-title{font-size:13px;font-weight:700;color:var(--gold);}</p>
+<p class="p1">.qs-sub{font-size:11px;color:var(--text2);margin-top:1px;}</p>
+<p class="p1">.history-filters{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;}</p>
+<p class="p1">.hf-select{flex:1;min-width:110px;font-size:13px;padding:.5rem .75rem;}</p>
+<p class="p1">.game-item{padding:1rem;background:var(--surface);border-radius:var(--rsm);margin-bottom:.5rem;border:1px solid var(--border);}</p>
+<p class="p1">.game-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem;gap:8px;}</p>
+<p class="p1">.game-hdr-left{min-width:0;}</p>
+<p class="p1">.game-num{font-weight:700;font-size:13px;}</p>
+<p class="p1">.game-event-tag{font-size:10px;color:var(--gb);font-weight:600;margin-top:2px;}</p>
+<p class="p1">.game-dt{font-size:11px;color:var(--text2);}</p>
+<p class="p1">.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}</p>
+<p class="p1">.chip{display:flex;align-items:center;gap:4px;background:var(--surface2);border-radius:20px;padding:4px 9px 4px 6px;font-size:12px;border:1px solid var(--border);max-width:100%;overflow:hidden;}</p>
+<p class="p1">.chip-em{font-size:14px;flex-shrink:0;}</p>
+<p class="p1">.chip-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}</p>
+<p class="p1">.chip-win{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.25);color:var(--gold);}</p>
+<p class="p1">.game-note{font-size:12px;color:var(--text2);margin-top:8px;font-style:italic;padding-left:10px;border-left:2px solid var(--border2);}</p>
+<p class="p1">.game-actions{display:flex;gap:5px;align-items:center;flex-shrink:0;}</p>
+<p class="p1">.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;max-height:195px;overflow-y:auto;padding:3px;}</p>
+<p class="p1">.emoji-btn{font-size:21px;padding:7px 4px;background:var(--surface2);border:2px solid transparent;border-radius:var(--rxs);cursor:pointer;text-align:center;transition:all .14s;}</p>
+<p class="p1">.emoji-btn:hover{background:var(--surface3);transform:scale(1.08);}</p>
+<p class="p1">.emoji-btn.selected{border-color:var(--ga);background:rgba(233,69,96,.12);}</p>
+<p class="p1">.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;padding:1rem;}</p>
+<p class="p1">.modal-overlay.open{display:flex;animation:fadeIn .2s ease;}</p>
+<p class="p1">@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}</p>
+<p class="p1">.modal{background:var(--bg3);border-radius:20px;padding:1.6rem;width:100%;max-width:440px;border:1px solid var(--border2);max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:modalIn .25s cubic-bezier(.34,1.3,.64,1);}</p>
+<p class="p1">@keyframes modalIn{from{opacity:0;transform:scale(.92) translateY(10px);}to{opacity:1;transform:none;}}</p>
+<p class="p1">.mtitle{font-size:19px;font-weight:800;margin-bottom:1.25rem;letter-spacing:-.3px;}</p>
+<p class="p1">.ph{background:var(--surface2);border-radius:var(--rsm);padding:1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:14px;border:1px solid var(--border);position:relative;overflow:hidden;}</p>
+<p class="p1">.ph::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grd);}</p>
+<p class="p1">.phav{font-size:42px;width:64px;height:64px;display:flex;align-items:center;justify-content:center;background:var(--surface3);border-radius:50%;flex-shrink:0;border:2px solid var(--border2);}</p>
+<p class="p1">.phname{font-size:20px;font-weight:800;letter-spacing:-.3px;}</p>
+<p class="p1">.phsub{font-size:12px;color:var(--text2);margin-top:3px;}</p>
+<p class="p1">.tab-row{display:flex;gap:3px;margin-bottom:1rem;background:var(--surface2);border-radius:var(--rsm);padding:3px;border:1px solid var(--border);}</p>
+<p class="p1">.tab-pill{flex:1;padding:.42rem .2rem;text-align:center;border-radius:var(--rxs);cursor:pointer;font-size:11px;font-weight:700;color:var(--text2);border:none;background:none;transition:all .18s;}</p>
+<p class="p1">.tab-pill.active{background:var(--grd);color:#fff;}</p>
+<p class="p1">.h2h-row{display:flex;align-items:center;gap:10px;padding:.7rem .8rem;background:var(--surface2);border-radius:var(--rsm);margin-bottom:.4rem;border:1px solid var(--border);}</p>
+<p class="p1">.h2hw{color:var(--green);font-weight:700;}</p>
+<p class="p1">.h2hl{color:var(--ga);font-weight:700;}</p>
+<p class="p1">.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}</p>
+<p class="p1">.sg-box{background:var(--surface2);border-radius:var(--rsm);padding:.8rem .5rem;text-align:center;border:1px solid var(--border);}</p>
+<p class="p1">.sg-num{font-size:20px;font-weight:800;letter-spacing:-.5px;}</p>
+<p class="p1">.sg-label{font-size:9px;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;}</p>
+<p class="p1">.record-row{display:flex;align-items:center;justify-content:space-between;padding:.6rem .8rem;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:var(--rxs);margin-bottom:6px;font-size:13px;gap:8px;}</p>
+<p class="p1">.record-label{color:var(--text2);flex-shrink:0;}</p>
+<p class="p1">.record-val{font-weight:700;color:var(--gold);text-align:right;}</p>
+<p class="p1">.season-item{display:flex;align-items:center;gap:10px;padding:.9rem 1rem;background:var(--surface);border-radius:var(--rsm);margin-bottom:.5rem;border:1px solid var(--border);cursor:pointer;transition:all .18s;}</p>
+<p class="p1">.season-item:hover{border-color:var(--border2);transform:translateY(-1px);}</p>
+<p class="p1">.danger-zone{background:rgba(233,69,96,.06);border:1px solid var(--danger-border);border-radius:var(--rsm);padding:1rem;margin-bottom:.875rem;}</p>
+<p class="p1">.danger-zone .dz-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ga);margin-bottom:.75rem;}</p>
+<p class="p1">.share-box{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--rsm);padding:1rem;font-size:12px;font-family:monospace;white-space:pre-wrap;word-break:break-all;color:var(--text2);max-height:180px;overflow-y:auto;line-height:1.7;}</p>
+<p class="p1">.chart-wrap{overflow-x:auto;border-radius:var(--rsm);background:var(--surface2);padding:.75rem;border:1px solid var(--border);}</p>
+<p class="p1">.edit-score-row{display:flex;align-items:center;gap:10px;padding:.6rem .75rem;background:var(--surface2);border-radius:var(--rsm);margin-bottom:6px;border:1px solid var(--border);}</p>
+<p class="p1">.edit-score-name{flex:1;font-size:13px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}</p>
+<p class="p1">.edit-score-input{width:70px;font-size:13px;padding:.38rem .6rem;text-align:center;}</p>
+<p class="p1">.row{display:flex;gap:8px;}.flex{display:flex;}.gap-sm{gap:8px;}.mt{margin-top:1rem;}.mtsm{margin-top:.5rem;}</p>
+<p class="p1">.hint{font-size:12px;color:var(--text2);margin-top:5px;line-height:1.5;}</p>
+<p class="p1">.empty{text-align:center;padding:3rem 1rem;color:var(--text2);font-size:14px;}</p>
+<p class="p1">.empty-icon{font-size:52px;margin-bottom:.9rem;display:block;}</p>
+<p class="p1">.divider{border:none;border-top:1px solid var(--border);margin:1rem 0;}</p>
+<p class="p1">.gradient-text{background:var(--grd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}</p>
+<p class="p1">.confetti-piece{position:fixed;width:10px;height:10px;top:-10px;animation:cffall linear forwards;pointer-events:none;z-index:9999;border-radius:2px;}</p>
+<p class="p1">@keyframes cffall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}</p>
+<p class="p1">::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px;}</p>
+<p class="p2"><br></p>
+<p class="p1">/* TUTORIAL */</p>
+<p class="p1">.tut-highlight{outline:2.5px solid #a855f7 !important;outline-offset:4px;border-radius:10px;}</p>
+<p class="p1">#tut-bubble{pointer-events:all;}</p>
+<p class="p1">#tut-overlay{pointer-events:all;}</p>
+<p class="p1">&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1">&lt;div class="bg-blob blob1"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="bg-blob blob2"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div id="loader"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="loader-dice"&gt;🎲&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="loader-title"&gt;Yahtzee!&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="loader-sub"&gt;Loading your tournament…&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="loader-dots"&gt;&lt;div class="loader-dot"&gt;&lt;/div&gt;&lt;div class="loader-dot"&gt;&lt;/div&gt;&lt;div class="loader-dot"&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;nav class="nav"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="nav-btn active" onclick="showPage('rankings')" id="tab-rankings"&gt;&lt;span class="ni"&gt;🏆&lt;/span&gt;Rankings&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="nav-btn" onclick="showPage('players')" id="tab-players"&gt;&lt;span class="ni"&gt;👥&lt;/span&gt;Players&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="nav-btn" onclick="showPage('games')" id="tab-games"&gt;&lt;span class="ni"&gt;🎲&lt;/span&gt;New Game&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="nav-btn" onclick="showPage('history')" id="tab-history"&gt;&lt;span class="ni"&gt;📋&lt;/span&gt;History&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="nav-btn" onclick="showPage('seasons')" id="tab-seasons"&gt;&lt;span class="ni"&gt;🏅&lt;/span&gt;Seasons&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="nav-btn" onclick="showPage('more')" id="tab-more"&gt;&lt;span class="ni"&gt;⚙️&lt;/span&gt;More&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="nav-btn" onclick="startTutorial()" id="tab-help" style="flex:0 0 42px;" title="Help"&gt;&lt;span class="ni"&gt;❓&lt;/span&gt;&lt;/button&gt;</p>
+<p class="p1">&lt;/nav&gt;</p>
+<p class="p1">&lt;div class="page active" id="page-rankings"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="pt"&gt;&lt;span class="gradient-text"&gt;Tournament&lt;/span&gt;&lt;div class="pt-right"&gt;&lt;span class="pt-icon" onclick="openScreenshot()" title="Share"&gt;📸&lt;/span&gt;&lt;span class="pt-icon" onclick="toggleTheme()" id="theme-icon"&gt;🌙&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="welcome-card" id="welcome-card" style="display:none;"&gt;&lt;div class="wc-icon"&gt;🎲&lt;/div&gt;&lt;h2&gt;Welcome to Yahtzee Tournament!&lt;/h2&gt;&lt;p&gt;Track wins, scores, Yahtzees and rivalries for your whole family.&lt;/p&gt;&lt;button class="btn btn-primary" onclick="showPage('players');openPlayerModal()"&gt;＋ Add your first player&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="monthly-summary"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="stat-strip"&gt;&lt;div class="sbox"&gt;&lt;div class="snum" id="stat-games"&gt;0&lt;/div&gt;&lt;div class="slabel"&gt;Games&lt;/div&gt;&lt;/div&gt;&lt;div class="sbox"&gt;&lt;div class="snum" id="stat-players"&gt;0&lt;/div&gt;&lt;div class="slabel"&gt;Players&lt;/div&gt;&lt;/div&gt;&lt;div class="sbox"&gt;&lt;div class="snum" id="stat-hi"&gt;—&lt;/div&gt;&lt;div class="slabel"&gt;Best Score&lt;/div&gt;&lt;/div&gt;&lt;div class="sbox"&gt;&lt;div class="snum" id="stat-yz"&gt;0&lt;/div&gt;&lt;div class="slabel"&gt;🎯 Yahtzees&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="season-bar" id="rankings-season-bar"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="st"&gt;Rankings&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="lb-list"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="page" id="page-players"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="pt"&gt;&lt;span class="gradient-text"&gt;Players&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="btn btn-primary btn-full" onclick="openPlayerModal()" style="margin-bottom:1rem;"&gt;＋ Add Player&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="players-list"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="page" id="page-games"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="pt"&gt;&lt;span class="gradient-text"&gt;New Game&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="game-no-players" style="display:none;"&gt;&lt;div class="empty"&gt;&lt;span class="empty-icon"&gt;👥&lt;/span&gt;Add players first!&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="quick-start-banner" style="display:none;" class="quick-start" onclick="quickStart()"&gt;&lt;span class="qs-icon"&gt;⚡&lt;/span&gt;&lt;div class="qs-text"&gt;&lt;div class="qs-title"&gt;Same players as last time&lt;/div&gt;&lt;div class="qs-sub" id="qs-sub-text"&gt;Tap to skip player selection&lt;/div&gt;&lt;/div&gt;&lt;span style="color:var(--gold);font-size:18px;"&gt;›&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="game-step1" style="display:none;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="step-indicator"&gt;&lt;div class="step-dot active"&gt;&lt;/div&gt;&lt;div class="step-dot"&gt;&lt;/div&gt;&lt;span class="step-label"&gt;Who's playing tonight?&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card" style="padding:1rem;"&gt;&lt;div class="player-select-grid" id="player-select-grid"&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;label style="margin-top:0;margin-bottom:6px;"&gt;Event &lt;span style="font-weight:400;color:var(--text3);"&gt;(optional)&lt;/span&gt;&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;select id="game-season-select" style="margin-bottom:1rem;"&gt;&lt;option value=""&gt;— No event —&lt;/option&gt;&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button class="btn btn-primary btn-full" onclick="goToStep2()" style="font-size:15px;padding:.8rem;"&gt;Next — Enter Scores →&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="game-step2" style="display:none;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="step-indicator"&gt;&lt;div class="step-dot done"&gt;&lt;/div&gt;&lt;div class="step-dot active"&gt;&lt;/div&gt;&lt;span class="step-label"&gt;Enter scores&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;&lt;div class="st"&gt;Scores &amp;amp; Yahtzees&lt;/div&gt;&lt;p class="hint" style="margin-bottom:1rem;"&gt;Upper = Aces–Sixes · Lower = Three of a Kind–Yahtzee bonus. Or just use one field for the total.&lt;/p&gt;&lt;div id="score-entry-list"&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="card"&gt;&lt;label style="margin-top:0;"&gt;Game date&lt;/label&gt;&lt;input type="date" id="game-date"&gt;&lt;label&gt;Notes&lt;/label&gt;&lt;textarea id="game-notes" placeholder="Trash talk, memorable moments…"&gt;&lt;/textarea&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="row" style="margin-bottom:.5rem;"&gt;&lt;button class="btn btn-secondary" onclick="goToStep1()" style="flex:0 0 auto;"&gt;← Back&lt;/button&gt;&lt;button class="btn btn-gold btn-full" onclick="saveGame()" style="font-size:15px;padding:.8rem;"&gt;💾 Save Game&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="page" id="page-history"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="pt"&gt;&lt;span class="gradient-text"&gt;History&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="history-filters"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;select class="hf-select" id="hist-player-filter" onchange="renderHistory()"&gt;&lt;option value=""&gt;All players&lt;/option&gt;&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;select class="hf-select" id="hist-season-filter" onchange="renderHistory()"&gt;&lt;option value=""&gt;All events&lt;/option&gt;&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;select class="hf-select" id="hist-month-filter" onchange="renderHistory()"&gt;&lt;option value=""&gt;All time&lt;/option&gt;&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="history-list"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="page" id="page-seasons"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="pt"&gt;&lt;span class="gradient-text"&gt;Seasons &amp;amp; Events&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="btn btn-primary btn-full" onclick="openSeasonModal()" style="margin-bottom:1rem;"&gt;＋ Create Event / Season&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="seasons-list"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="page" id="page-more"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="pt"&gt;&lt;span class="gradient-text"&gt;More&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="card"&gt;&lt;div class="st"&gt;Share Leaderboard&lt;/div&gt;&lt;div class="share-box" id="share-text"&gt;&lt;/div&gt;&lt;button class="btn btn-secondary btn-full mtsm" onclick="copyShare(event)"&gt;📋 Copy to Clipboard&lt;/button&gt;&lt;button class="btn btn-secondary btn-full mtsm" onclick="openScreenshot()"&gt;📸 Screenshot Card&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="card"&gt;&lt;div class="st"&gt;Backup &amp;amp; Restore&lt;/div&gt;&lt;button class="btn btn-secondary btn-full" onclick="exportData()" style="margin-bottom:8px;"&gt;📤 Export JSON backup&lt;/button&gt;&lt;button class="btn btn-secondary btn-full" onclick="document.getElementById('imp-file').click()"&gt;📥 Import JSON backup&lt;/button&gt;&lt;input type="file" id="imp-file" accept=".json" style="display:none" onchange="importData(event)"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="danger-zone"&gt;&lt;div class="dz-title"&gt;⚠️ Danger Zone&lt;/div&gt;&lt;button class="btn btn-danger btn-full" onclick="confirmResetAll()"&gt;🗑 Reset all data&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="card"&gt;&lt;div class="st"&gt;About&lt;/div&gt;&lt;p style="font-size:13px;color:var(--text2);line-height:1.7;"&gt;Yahtzee Tournament Tracker · Offline PWA · Data stored locally · No account needed.&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;!-- TUTORIAL --&gt;</p>
+<p class="p1">&lt;div id="tut-overlay" style="display:none;position:fixed;inset:0;z-index:500;pointer-events:none;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div id="tut-spotlight" style="display:none;position:fixed;z-index:501;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.72);transition:all .35s cubic-bezier(.4,0,.2,1);pointer-events:none;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div id="tut-bubble" style="display:none;position:fixed;z-index:502;max-width:290px;width:88vw;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div style="background:var(--bg3);border:1.5px solid rgba(168,85,247,.4);border-radius:18px;padding:1.1rem 1.2rem;box-shadow:0 16px 48px rgba(0,0,0,.6);position:relative;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div style="display:flex;align-items:center;gap:10px;margin-bottom:.65rem;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span id="tut-mascot" style="font-size:30px;display:inline-block;animation:diceSpin 2s cubic-bezier(.68,-.55,.27,1.55) infinite alternate;"&gt;🎲&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div style="flex:1;min-width:0;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#a855f7;"&gt;Dizzy says…&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="font-size:10px;color:var(--text3);" id="tut-step-label"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button onclick="endTutorial()" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0;" title="Skip"&gt;✕&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="tut-text" style="font-size:14px;line-height:1.65;color:var(--text);margin-bottom:1rem;"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div style="display:flex;align-items:center;gap:8px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div style="display:flex;gap:4px;flex:1;align-items:center;" id="tut-dots"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button id="tut-next-btn" onclick="tutNext()" style="background:linear-gradient(135deg,#e94560,#a855f7);color:#fff;border:none;border-radius:8px;padding:.5rem 1.1rem;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;"&gt;Next →&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="tut-arrow" style="position:absolute;width:14px;height:14px;background:var(--bg3);border:1.5px solid rgba(168,85,247,.4);transform:rotate(45deg);z-index:-1;"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;!-- MODALS --&gt;</p>
+<p class="p1">&lt;div class="modal-overlay" id="player-modal"&gt;&lt;div class="modal"&gt;&lt;div class="mtitle" id="modal-title"&gt;New Player&lt;/div&gt;&lt;div class="st"&gt;Pick an avatar&lt;/div&gt;&lt;div class="emoji-grid" id="emoji-grid"&gt;&lt;/div&gt;&lt;label&gt;Name&lt;/label&gt;&lt;input type="text" id="pname-input" placeholder="e.g. Grandma Jan" maxlength="20"&gt;&lt;div class="flex gap-sm mt"&gt;&lt;button class="btn btn-secondary" style="flex:1" onclick="closePlayerModal()"&gt;Cancel&lt;/button&gt;&lt;button class="btn btn-primary" style="flex:1" onclick="savePlayer()"&gt;Save Player&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="modal-overlay" id="profile-modal"&gt;&lt;div class="modal"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="ph"&gt;&lt;div class="phav" id="prof-emoji"&gt;&lt;/div&gt;&lt;div&gt;&lt;div class="phname" id="prof-name"&gt;&lt;/div&gt;&lt;div class="phsub" id="prof-sub"&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="tab-row"&gt;&lt;button class="tab-pill active" onclick="profTab('stats')" id="ptab-stats"&gt;Stats&lt;/button&gt;&lt;button class="tab-pill" onclick="profTab('records')" id="ptab-records"&gt;Records&lt;/button&gt;&lt;button class="tab-pill" onclick="profTab('h2h')" id="ptab-h2h"&gt;H2H&lt;/button&gt;&lt;button class="tab-pill" onclick="profTab('chart')" id="ptab-chart"&gt;Trend&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="prof-stats"&gt;&lt;/div&gt;&lt;div id="prof-records" style="display:none;"&gt;&lt;/div&gt;&lt;div id="prof-h2h" style="display:none;"&gt;&lt;/div&gt;&lt;div id="prof-chart" style="display:none;"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="flex gap-sm mt"&gt;&lt;button class="btn btn-secondary" style="flex:1" onclick="closeProfile()"&gt;Close&lt;/button&gt;&lt;button class="btn btn-secondary" style="flex:1" onclick="rematchFromProfile()"&gt;🎲 Rematch&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="modal-overlay" id="season-modal"&gt;&lt;div class="modal"&gt;&lt;div class="mtitle" id="season-modal-title"&gt;New Event&lt;/div&gt;&lt;label style="margin-top:0;"&gt;Event name&lt;/label&gt;&lt;input type="text" id="season-name-input" placeholder="e.g. Christmas 2025" maxlength="40"&gt;&lt;label&gt;Icon&lt;/label&gt;&lt;div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.5rem;" id="season-emoji-row"&gt;&lt;/div&gt;&lt;label&gt;Description &lt;span style="font-weight:400;color:var(--text3);"&gt;(optional)&lt;/span&gt;&lt;/label&gt;&lt;input type="text" id="season-desc-input" placeholder="e.g. Annual family championship" maxlength="80"&gt;&lt;div class="flex gap-sm mt"&gt;&lt;button class="btn btn-secondary" style="flex:1" onclick="closeSeasonModal()"&gt;Cancel&lt;/button&gt;&lt;button class="btn btn-primary" style="flex:1" onclick="saveSeason()"&gt;Save&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="modal-overlay" id="screenshot-modal"&gt;&lt;div class="modal"&gt;&lt;div class="mtitle"&gt;📸 Share Card&lt;/div&gt;&lt;p class="hint" style="margin-bottom:1rem;"&gt;Screenshot this card to share with your family group chat!&lt;/p&gt;&lt;div id="scr-wrap"&gt;&lt;/div&gt;&lt;div class="flex gap-sm mt"&gt;&lt;button class="btn btn-secondary" style="flex:1" onclick="closeModal('screenshot-modal')"&gt;Close&lt;/button&gt;&lt;button class="btn btn-primary" style="flex:1" onclick="copyShareText()"&gt;📋 Copy text&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="modal-overlay" id="confirm-modal"&gt;&lt;div class="modal"&gt;&lt;div class="mtitle"&gt;Delete player?&lt;/div&gt;&lt;p style="color:var(--text2);font-size:14px;margin-bottom:1.25rem;line-height:1.6;"&gt;Removes the player and all their game records. &lt;strong&gt;Cannot be undone.&lt;/strong&gt;&lt;/p&gt;&lt;div class="flex gap-sm"&gt;&lt;button class="btn btn-secondary" style="flex:1" onclick="closeModal('confirm-modal')"&gt;Cancel&lt;/button&gt;&lt;button class="btn btn-danger" style="flex:1" id="confirm-del-btn"&gt;Yes, Delete&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="modal-overlay" id="confirm-game-modal"&gt;&lt;div class="modal"&gt;&lt;div class="mtitle"&gt;Delete this game?&lt;/div&gt;&lt;p style="color:var(--text2);font-size:14px;margin-bottom:1.25rem;line-height:1.6;"&gt;Permanently removes this game. &lt;strong&gt;Cannot be undone.&lt;/strong&gt;&lt;/p&gt;&lt;div class="flex gap-sm"&gt;&lt;button class="btn btn-secondary" style="flex:1" onclick="closeModal('confirm-game-modal')"&gt;Cancel&lt;/button&gt;&lt;button class="btn btn-danger" style="flex:1" id="confirm-game-del-btn"&gt;Yes, Delete&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="modal-overlay" id="confirm-reset-modal"&gt;&lt;div class="modal"&gt;&lt;div class="mtitle"&gt;Reset everything?&lt;/div&gt;&lt;p style="color:var(--text2);font-size:14px;margin-bottom:1.25rem;line-height:1.6;"&gt;Deletes &lt;strong&gt;all players, games and seasons&lt;/strong&gt;. Export a backup first!&lt;/p&gt;&lt;div class="flex gap-sm"&gt;&lt;button class="btn btn-secondary" style="flex:1" onclick="closeModal('confirm-reset-modal')"&gt;Cancel&lt;/button&gt;&lt;button class="btn btn-danger" style="flex:1" onclick="doResetAll()"&gt;Yes, Delete Everything&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="modal-overlay" id="edit-game-modal"&gt;&lt;div class="modal"&gt;&lt;div class="mtitle"&gt;Edit Game&lt;/div&gt;&lt;div id="edit-game-scores"&gt;&lt;/div&gt;&lt;label&gt;Event&lt;/label&gt;&lt;select id="edit-game-season"&gt;&lt;/select&gt;&lt;label&gt;Notes&lt;/label&gt;&lt;textarea id="edit-game-notes" placeholder="Notes…"&gt;&lt;/textarea&gt;&lt;div class="flex gap-sm mt"&gt;&lt;button class="btn btn-secondary" style="flex:1" onclick="closeModal('edit-game-modal')"&gt;Cancel&lt;/button&gt;&lt;button class="btn btn-primary" style="flex:1" onclick="saveEditGame()"&gt;Save Changes&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;div class="modal-overlay" id="rematch-modal"&gt;&lt;div class="modal"&gt;&lt;div class="mtitle"&gt;🎲 Rematch!&lt;/div&gt;&lt;p style="color:var(--text2);font-size:14px;margin-bottom:1rem;line-height:1.6;"&gt;Same players loaded. Head to New Game!&lt;/p&gt;&lt;button class="btn btn-gold btn-full" onclick="closeModal('rematch-modal');showPage('games');"&gt;Let's go! 🎯&lt;/button&gt;&lt;button class="btn btn-secondary btn-full mtsm" onclick="closeModal('rematch-modal')"&gt;Cancel&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1">const EMOJIS=['😀','😎','🤩','🥳','😤','😈','👑','🦁','🐯','🦊','🐸','🦄','🐼','🦋','🐉','🦖','🐺','🦅','🦝','🐮','🍕','🍦','🎯','⚡','🔥','💎','🌟','🚀','🎸','🏆','🎪','🌈','🧙','🥷','🤠','🦸','🧜','🧚','🤖','👾','🎳','🎲','🃏','♟️','🎭','🌊','🦩','🐧'];</p>
+<p class="p1">const SEMOJIS=['🏆','🎄','🎂','🌞','🌙','❄️','🎉','🏠','🎮','🎯','⭐','🔥','🌈','🎪','🏅'];</p>
+<p class="p1">let state={players:[],games:[],seasons:[]};</p>
+<p class="p1">let editingPid=null,selEmoji='😀',delPendId=null,profPid=null,lightMode=false;</p>
+<p class="p1">let gYahtzees={},lastGamePlayers=[],selectedPids=new Set();</p>
+<p class="p1">let editingGameId=null,delGamePendId=null,editingSeasonId=null,selSeasonEmoji='🏆';</p>
+<p class="p1">let activeSeasonFilter='all';</p>
+<p class="p2"><br></p>
+<p class="p1">function save(){localStorage.setItem('yahtzee_v3',JSON.stringify(state));}</p>
+<p class="p1">function load(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>let d=localStorage.getItem('yahtzee_v3')||localStorage.getItem('yahtzee_v2');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(d){state=JSON.parse(d);}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!state.seasons)state.seasons=[];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>state.games.forEach(g=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>g.scores.forEach(s=&gt;{if(s.upper===undefined)s.upper=null;if(s.lower===undefined)s.lower=null;if(s.yahtzees===undefined)s.yahtzees=0;});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(!g.note)g.note='';if(!g.seasonId)g.seasonId='';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(localStorage.getItem('yahtzee_theme')==='light'){</p>
+<p class="p1"><span class="Apple-converted-space">    </span>lightMode=true;document.body.classList.add('light');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('theme-icon').textContent='☀️';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('theme-color-meta').content='#f4f4fb';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1">}</p>
+<p class="p1">function toggleTheme(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>lightMode=!lightMode;document.body.classList.toggle('light',lightMode);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>localStorage.setItem('yahtzee_theme',lightMode?'light':'dark');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('theme-icon').textContent=lightMode?'☀️':'🌙';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('theme-color-meta').content=lightMode?'#f4f4fb':'#0d0d1a';</p>
+<p class="p1">}</p>
+<p class="p1">function closeModal(id){document.getElementById(id).classList.remove('open');}</p>
+<p class="p1">function showPage(name){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.querySelectorAll('.page').forEach(p=&gt;p.classList.remove('active'));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.querySelectorAll('.nav-btn').forEach(b=&gt;b.classList.remove('active'));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('page-'+name).classList.add('active');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('tab-'+name).classList.add('active');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(name==='rankings')renderRankings();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(name==='players')renderPlayers();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(name==='games')renderGamePage();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(name==='history'){populateHistoryFilters();renderHistory();}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(name==='seasons')renderSeasons();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(name==='more')renderMore();</p>
+<p class="p1">}</p>
+<p class="p1">function fGames(sid){return(!sid||sid==='all')?state.games:state.games.filter(g=&gt;g.seasonId===sid);}</p>
+<p class="p1">function getStats(sid){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const games=fGames(sid);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return state.players.map(p=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const sc=games.flatMap(g=&gt;g.scores.filter(s=&gt;s.playerId===p.id&amp;&amp;s.score!==null).map(s=&gt;s.score));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const wins=games.filter(g=&gt;{const v=g.scores.filter(s=&gt;s.score!==null);if(!v.length)return false;return v.slice().sort((a,b)=&gt;b.score-a.score)[0]?.playerId===p.id;}).length;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let p2=0,p3=0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>games.forEach(g=&gt;{const v=g.scores.filter(s=&gt;s.score!==null).slice().sort((a,b)=&gt;b.score-a.score);if(v[1]?.playerId===p.id)p2++;if(v[2]?.playerId===p.id)p3++;});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const totalYz=games.reduce((a,g)=&gt;{const s=g.scores.find(s=&gt;s.playerId===p.id);return a+(s?s.yahtzees:0);},0);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const maxYzG=games.reduce((mx,g)=&gt;{const s=g.scores.find(s=&gt;s.playerId===p.id);return s&amp;&amp;s.yahtzees&gt;mx?s.yahtzees:mx;},0);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const avg=sc.length?Math.round(sc.reduce((a,b)=&gt;a+b,0)/sc.length):0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const best=sc.length?Math.max(...sc):0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const worst=sc.length?Math.min(...sc):0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const chrono=games.slice().reverse().filter(g=&gt;g.scores.some(s=&gt;s.playerId===p.id&amp;&amp;s.score!==null));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let cur=0,max=0,run=0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>chrono.forEach((g,i)=&gt;{const v=g.scores.filter(s=&gt;s.score!==null);const won=v.slice().sort((a,b)=&gt;b.score-a.score)[0]?.playerId===p.id;if(won){run++;if(run&gt;max)max=run;}else run=0;if(i===chrono.length-1)cur=run;});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return{...p,games:sc.length,wins,p2nd:p2,p3rd:p3,avg,best,worst,totalYz,maxYzG,curStreak:cur,maxStreak:max};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}).sort((a,b)=&gt;b.wins-a.wins||b.avg-a.avg);</p>
+<p class="p1">}</p>
+<p class="p1">function getHistory(pid){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return state.games.filter(g=&gt;g.scores.some(s=&gt;s.playerId===pid&amp;&amp;s.score!==null)).map(g=&gt;g.scores.find(s=&gt;s.playerId===pid).score).reverse();</p>
+<p class="p1">}</p>
+<p class="p1">function renderMonthlySummary(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const el=document.getElementById('monthly-summary');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!state.games.length){el.innerHTML='';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const now=new Date(),tm=now.getMonth(),ty=now.getFullYear();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const mg=state.games.filter(g=&gt;{const d=new Date(g.date+'T12:00:00');return d.getMonth()===tm&amp;&amp;d.getFullYear()===ty;});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!mg.length){el.innerHTML='';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const wc={};mg.forEach(g=&gt;{const v=g.scores.filter(s=&gt;s.score!==null).slice().sort((a,b)=&gt;b.score-a.score);if(v[0])wc[v[0].playerId]=(wc[v[0].playerId]||0)+1;});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const tid=Object.entries(wc).sort((a,b)=&gt;b[1]-a[1])[0]?.[0];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const tp=state.players.find(p=&gt;p.id===tid);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const mn=now.toLocaleDateString(undefined,{month:'long'});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const tyz=mg.reduce((a,g)=&gt;a+g.scores.reduce((b,s)=&gt;b+s.yahtzees,0),0);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>el.innerHTML='&lt;div class="monthly-card"&gt;&lt;div class="monthly-title"&gt;📅 '+mn+' so far&lt;/div&gt;&lt;div class="monthly-body"&gt;'+mg.length+' game'+(mg.length!==1?'s':'')+' played'+(tp?' · &lt;strong&gt;'+tp.emoji+' '+esc(tp.name)+'&lt;/strong&gt; leading with '+wc[tid]+' win'+(wc[tid]!==1?'s':''):'')+'.'+( tyz&gt;0?'&lt;br&gt;🎯 '+tyz+' Yahtzee'+(tyz!==1?'s':'')+' rolled this month.':'')+'&lt;/div&gt;&lt;/div&gt;';</p>
+<p class="p1">}</p>
+<p class="p1">function renderSeasonBar(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const bar=document.getElementById('rankings-season-bar');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!state.seasons.length){bar.innerHTML='';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pills=[{id:'all',label:'All time',emoji:''},...state.seasons.map(s=&gt;({id:s.id,label:s.name,emoji:s.emoji}))];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>bar.innerHTML=pills.map(p=&gt;'&lt;span class="season-pill '+(activeSeasonFilter===p.id?'active':'')+'" onclick="setSeasonFilter(&amp;apos;"+p.id+"&amp;apos;)"&gt;'+(p.emoji?p.emoji+' ':'')+esc(p.label)+'&lt;/span&gt;').join('');</p>
+<p class="p1">}</p>
+<p class="p1">function setSeasonFilter(id){activeSeasonFilter=id;renderSeasonBar();renderLeaderboard();}</p>
+<p class="p1">function renderRankings(){renderMonthlySummary();renderSeasonBar();renderLeaderboard();}</p>
+<p class="p1">function renderLeaderboard(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const sid=activeSeasonFilter==='all'?null:activeSeasonFilter;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const ranked=getStats(sid);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const games=fGames(sid);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const allSc=games.flatMap(g=&gt;g.scores.filter(s=&gt;s.score!==null).map(s=&gt;s.score));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const allYz=games.reduce((a,g)=&gt;a+g.scores.reduce((b,s)=&gt;b+s.yahtzees,0),0);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('stat-games').textContent=games.length;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('stat-players').textContent=state.players.length;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('stat-hi').textContent=allSc.length?Math.max(...allSc):'—';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('stat-yz').textContent=allYz;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('welcome-card').style.display=state.players.length===0?'block':'none';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const el=document.getElementById('lb-list');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!ranked.length){el.innerHTML='';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!ranked.some(p=&gt;p.games&gt;0)){el.innerHTML='&lt;div style="text-align:center;padding:1.5rem;color:var(--text2);font-size:13px;"&gt;No games logged yet — tap New Game to start!&lt;/div&gt;';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const maxW=ranked.find(p=&gt;p.wins&gt;0)?.wins||1;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>el.innerHTML=ranked.map((p,i)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const barC=i===0?'var(--gold)':i===1?'var(--silver)':i===2?'var(--bronze)':'var(--ga)';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const fire=p.curStreak&gt;=3?'&lt;span class="badge bfire"&gt;🔥 '+p.curStreak+' streak&lt;/span&gt;':'';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const yz=p.totalYz&gt;0?'&lt;span class="badge byahtzee"&gt;🎯 '+p.totalYz+'&lt;/span&gt;':'';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const pod=(p.p2nd&gt;0||p.p3rd&gt;0)?'&lt;span class="badge bpodium"&gt;🥈×'+p.p2nd+' 🥉×'+p.p3rd+'&lt;/span&gt;':'';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const sub=(fire||yz||pod)?'&lt;div class="bdgs"&gt;'+fire+yz+pod+'&lt;/div&gt;':'&lt;div class="lb-sub"&gt;'+p.games+' game'+(p.games!==1?'s':'')+' · avg '+p.avg+' · best '+p.best+'&lt;/div&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return'&lt;div class="lb-row'+(i===0&amp;&amp;p.wins&gt;0?' first-row':'')+'" onclick="openProfile(&amp;apos;"+p.id+"&amp;apos;)"&gt;'</p>
+<p class="p1"><span class="Apple-converted-space">      </span>+'&lt;div class="lb-bar" style="width:'+(p.wins?Math.round((p.wins/maxW)*100):0)+'%;background:'+barC+';"&gt;&lt;/div&gt;'</p>
+<p class="p1"><span class="Apple-converted-space">      </span>+'&lt;div class="lb-glow"&gt;&lt;/div&gt;'</p>
+<p class="p1"><span class="Apple-converted-space">      </span>+'&lt;div class="lb-rank"&gt;'+medal+'&lt;/div&gt;'</p>
+<p class="p1"><span class="Apple-converted-space">      </span>+'&lt;div class="lb-av"&gt;'+p.emoji+'&lt;/div&gt;'</p>
+<p class="p1"><span class="Apple-converted-space">      </span>+'&lt;div class="lb-info"&gt;&lt;div class="lb-name"&gt;'+esc(p.name)+'&lt;/div&gt;'+sub+'&lt;/div&gt;'</p>
+<p class="p1"><span class="Apple-converted-space">      </span>+'&lt;div class="lb-right"&gt;&lt;div class="lb-wins"&gt;'+p.wins+'&lt;/div&gt;&lt;div class="lb-wlabel"&gt;WINS&lt;/div&gt;&lt;/div&gt;'</p>
+<p class="p1"><span class="Apple-converted-space">      </span>+'&lt;div class="lb-tap-hint"&gt;› details&lt;/div&gt;'</p>
+<p class="p1"><span class="Apple-converted-space">      </span>+'&lt;/div&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}).join('');</p>
+<p class="p1">}</p>
+<p class="p1">function renderPlayers(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const el=document.getElementById('players-list');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!state.players.length){el.innerHTML='&lt;div class="empty"&gt;&lt;span class="empty-icon"&gt;🎳&lt;/span&gt;No players yet!&lt;/div&gt;';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const stats=getStats();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>el.innerHTML=state.players.map(p=&gt;{const s=stats.find(x=&gt;x.id===p.id)||{games:0,wins:0,avg:0};return'&lt;div class="player-item"&gt;&lt;div class="pav"&gt;'+p.emoji+'&lt;/div&gt;&lt;div style="flex:1;cursor:pointer;min-width:0;" onclick="openProfile(&amp;apos;"+p.id+"&amp;apos;)"&gt;&lt;div class="pname"&gt;'+esc(p.name)+'&lt;/div&gt;&lt;div class="pstats"&gt;'+s.games+' games · '+s.wins+' wins · avg '+s.avg+'&lt;/div&gt;&lt;/div&gt;&lt;div class="pacts"&gt;&lt;button class="btn btn-secondary btn-sm btn-icon-circle" onclick="event.stopPropagation();openPlayerModal(&amp;apos;"+p.id+"&amp;apos;)"&gt;✏️&lt;/button&gt;&lt;button class="btn btn-danger btn-sm btn-icon-circle" onclick="event.stopPropagation();confirmDelete(&amp;apos;"+p.id+"&amp;apos;)"&gt;🗑&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;';}).join('');</p>
+<p class="p1">}</p>
+<p class="p1">function renderGamePage(pre){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const noP=document.getElementById('game-no-players'),s1=document.getElementById('game-step1'),s2=document.getElementById('game-step2'),qs=document.getElementById('quick-start-banner');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!state.players.length){noP.style.display='block';s1.style.display='none';s2.style.display='none';qs.style.display='none';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>noP.style.display='none';s2.style.display='none';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(lastGamePlayers.length&amp;&amp;!pre){const names=lastGamePlayers.map(id=&gt;{const p=state.players.find(x=&gt;x.id===id);return p?p.emoji:'';}).filter(Boolean).join('');document.getElementById('qs-sub-text').textContent=names+' — same as last game';qs.style.display='flex';}else{qs.style.display='none';}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>s1.style.display='block';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>selectedPids=pre?new Set(pre.filter(id=&gt;state.players.find(p=&gt;p.id===id))):new Set(state.players.map(p=&gt;p.id));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>renderPlayerSelect();populateSeasonSelect('game-season-select','');</p>
+<p class="p1">}</p>
+<p class="p1">function quickStart(){if(!lastGamePlayers.length)return;selectedPids=new Set(lastGamePlayers.filter(id=&gt;state.players.find(p=&gt;p.id===id)));goToStep2();}</p>
+<p class="p1">function renderPlayerSelect(){document.getElementById('player-select-grid').innerHTML=state.players.map(p=&gt;{const sel=selectedPids.has(p.id);return'&lt;div class="ps-row'+(sel?' selected':'')+'" onclick="togglePS(&amp;apos;"+p.id+"&amp;apos;)"&gt;'+'&lt;div class="ps-check"&gt;'+(sel?'✓':'')+'&lt;/div&gt;&lt;div class="pav" style="width:36px;height:36px;font-size:19px;"&gt;'+p.emoji+'&lt;/div&gt;&lt;span style="font-size:14px;font-weight:600;"&gt;'+esc(p.name)+'&lt;/span&gt;&lt;/div&gt;';}).join('');}</p>
+<p class="p1">function togglePS(pid){if(selectedPids.has(pid))selectedPids.delete(pid);else selectedPids.add(pid);renderPlayerSelect();}</p>
+<p class="p1">function goToStep2(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(selectedPids.size===0){showToast('Select at least one player!');return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('game-step1').style.display='none';document.getElementById('game-step2').style.display='block';document.getElementById('quick-start-banner').style.display='none';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('game-date').value=new Date().toISOString().split('T')[0];document.getElementById('game-notes').value='';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>gYahtzees={};state.players.forEach(p=&gt;{gYahtzees[p.id]=0;});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const active=state.players.filter(p=&gt;selectedPids.has(p.id));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('score-entry-list').innerHTML=active.map(p=&gt;'&lt;div class="score-entry-row"&gt;&lt;div class="ser-top"&gt;&lt;span style="font-size:24px;flex-shrink:0;"&gt;'+p.emoji+'&lt;/span&gt;&lt;span class="ser-name"&gt;'+esc(p.name)+'&lt;/span&gt;&lt;span class="ser-total" id="stot-'+p.id+'"&gt;—&lt;/span&gt;&lt;/div&gt;&lt;div class="ser-bd"&gt;&lt;div class="ser-sub"&gt;&lt;span class="ser-sublabel"&gt;Upper &lt;span class="ser-tip"&gt;(Aces–Sixes)&lt;/span&gt;&lt;/span&gt;&lt;input type="number" class="ser-subinput" id="upper-'+p.id+'" placeholder="—" min="0" max="105" oninput="updateTot(&amp;apos;"+p.id+"&amp;apos;)"&gt;&lt;/div&gt;&lt;div class="ser-sub"&gt;&lt;span class="ser-sublabel"&gt;Lower &lt;span class="ser-tip"&gt;(3-of-a-Kind–Yahtzee)&lt;/span&gt;&lt;/span&gt;&lt;input type="number" class="ser-subinput" id="lower-'+p.id+'" placeholder="—" min="0" max="1470" oninput="updateTot(&amp;apos;"+p.id+"&amp;apos;)"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="yctr"&gt;&lt;span class="yclabel"&gt;🎯 Yahtzees rolled&lt;/span&gt;&lt;button class="ycbtn" onclick="adjY(&amp;apos;"+p.id+"&amp;apos;,-1,this)"&gt;−&lt;/button&gt;&lt;span class="ycval" id="yc-'+p.id+'"&gt;0&lt;/span&gt;&lt;button class="ycbtn" onclick="adjY(&amp;apos;"+p.id+"&amp;apos;,1,this)"&gt;+&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;').join('');</p>
+<p class="p1">}</p>
+<p class="p1">function goToStep1(){document.getElementById('game-step2').style.display='none';document.getElementById('game-step1').style.display='block';if(lastGamePlayers.length)document.getElementById('quick-start-banner').style.display='flex';}</p>
+<p class="p1">function updateTot(pid){const u=document.getElementById('upper-'+pid)?.value,l=document.getElementById('lower-'+pid)?.value,el=document.getElementById('stot-'+pid);if(el)el.textContent=(u===''&amp;&amp;l==='')?'—':(parseInt(u||0)+parseInt(l||0));}</p>
+<p class="p1">function adjY(pid,d,btn){gYahtzees[pid]=Math.max(0,(gYahtzees[pid]||0)+d);document.getElementById('yc-'+pid).textContent=gYahtzees[pid];btn.style.transform='scale(.82)';setTimeout(()=&gt;btn.style.transform='',150);}</p>
+<p class="p1">function saveGame(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const active=state.players.filter(p=&gt;selectedPids.has(p.id));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const scores=active.map(p=&gt;{const u=document.getElementById('upper-'+p.id)?.value,l=document.getElementById('lower-'+p.id)?.value;if(u===''&amp;&amp;l==='')return null;const up=u!==''?parseInt(u):null,lo=l!==''?parseInt(l):null;return{playerId:p.id,score:(up||0)+(lo||0),upper:up,lower:lo,yahtzees:gYahtzees[p.id]||0};}).filter(Boolean);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!scores.length){showToast('Enter at least one score!');return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const sid=document.getElementById('game-season-select').value||'';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const note=document.getElementById('game-notes').value.trim();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const dateVal=document.getElementById('game-date').value;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const ng={id:Date.now().toString(),date:dateVal||new Date().toISOString().split('T')[0],scores,note,seasonId:sid};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>lastGamePlayers=[...selectedPids];state.games.unshift(ng);save();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const sorted=scores.slice().sort((a,b)=&gt;b.score-a.score);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const wp=state.players.find(p=&gt;p.id===sorted[0].playerId);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const isNB=scores.some(s=&gt;{const prev=state.games.slice(1).flatMap(g=&gt;g.scores.filter(x=&gt;x.playerId===s.playerId&amp;&amp;x.score!==null).map(x=&gt;x.score));return prev.length&amp;&amp;s.score&gt;Math.max(...prev);});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>celebrate(wp,sorted,isNB,scores.reduce((a,s)=&gt;a+s.yahtzees,0));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>renderGamePage();</p>
+<p class="p1">}</p>
+<p class="p1">function celebrate(winner,sorted,isNB,yz){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const colors=['#fbbf24','#f97316','#e94560','#a855f7','#3b82f6','#4ade80','#f472b6'];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>for(let i=0;i&lt;80;i++){const p=document.createElement('div');p.className='confetti-piece';const sz=5+Math.random()*8;p.style.cssText='left:'+Math.random()*100+'vw;background:'+colors[Math.floor(Math.random()*colors.length)]+';animation-duration:'+(0.9+Math.random()*1.3)+'s;animation-delay:'+Math.random()*.7+'s;width:'+sz+'px;height:'+sz+'px;transform:rotate('+Math.random()*360+'deg);border-radius:'+(Math.random()&gt;.5?'50%':'2px')+';';document.body.appendChild(p);setTimeout(()=&gt;p.remove(),2800);}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const msgs=[winner.emoji+' '+esc(winner.name||'Winner')+' wins!'];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(sorted[1]){const p2=state.players.find(p=&gt;p.id===sorted[1].playerId);if(p2)msgs.push('🥈 '+p2.emoji+' '+esc(p2.name)+' — '+sorted[1].score);}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(isNB)msgs.push('🌟 New personal best!');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(yz&gt;0)msgs.push('🎯 '+yz+' Yahtzee'+(yz!==1?'s':'')+' this game!');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const t=document.createElement('div');t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg3);border:1.5px solid rgba(251,191,36,.4);border-radius:20px;padding:1.6rem 2rem;text-align:center;z-index:9999;max-width:310px;width:90%;box-shadow:0 24px 80px rgba(0,0,0,.7);animation:modalIn .3s cubic-bezier(.34,1.3,.64,1);';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>t.innerHTML=msgs.map((m,i)=&gt;'&lt;div style="font-size:'+(i===0?22:13)+'px;font-weight:'+(i===0?800:600)+';margin-bottom:'+(i&lt;msgs.length-1?6:0)+'px;'+(i&gt;0?'color:var(--text2);':'')+'"&gt;'+ m+'&lt;/div&gt;').join('')</p>
+<p class="p1"><span class="Apple-converted-space">    </span>+'&lt;div style="display:flex;gap:8px;margin-top:1rem;"&gt;'</p>
+<p class="p1"><span class="Apple-converted-space">    </span>+'&lt;button onclick="this.closest(\'div[style*=fixed]\').remove();showPage(\'rankings\');" style="flex:1;padding:.55rem;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;"&gt;🏆 Rankings&lt;/button&gt;'</p>
+<p class="p1"><span class="Apple-converted-space">    </span>+'&lt;button onclick="this.closest(\'div[style*=fixed]\').remove();showPage(\'games\');" style="flex:1;padding:.55rem;border-radius:8px;border:none;background:linear-gradient(135deg,#fbbf24,#f97316);color:#1a0a00;font-size:12px;font-weight:700;cursor:pointer;"&gt;🎲 Play Again&lt;/button&gt;'</p>
+<p class="p1"><span class="Apple-converted-space">    </span>+'&lt;/div&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.body.appendChild(t);</p>
+<p class="p1">}</p>
+<p class="p1">function showToast(msg){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--surface3);color:var(--text);padding:.7rem 1.2rem;border-radius:24px;font-size:13px;font-weight:600;z-index:8000;box-shadow:0 8px 24px rgba(0,0,0,.4);white-space:nowrap;';t.textContent=msg;document.body.appendChild(t);setTimeout(()=&gt;t.remove(),2200);}</p>
+<p class="p1">function populateHistoryFilters(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pf=document.getElementById('hist-player-filter'),sf=document.getElementById('hist-season-filter'),mf=document.getElementById('hist-month-filter');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pv=pf.value,sv=sf.value,mv=mf.value;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>pf.innerHTML='&lt;option value=""&gt;All players&lt;/option&gt;'+state.players.map(p=&gt;'&lt;option value="'+p.id+'"&gt;'+p.emoji+' '+esc(p.name)+'&lt;/option&gt;').join('');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>sf.innerHTML='&lt;option value=""&gt;All events&lt;/option&gt;'+state.seasons.map(s=&gt;'&lt;option value="'+s.id+'"&gt;'+s.emoji+' '+esc(s.name)+'&lt;/option&gt;').join('');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const months=[...new Set(state.games.map(g=&gt;g.date.slice(0,7)))].sort().reverse();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>mf.innerHTML='&lt;option value=""&gt;All time&lt;/option&gt;'+months.map(m=&gt;{const d=new Date(m+'-01'),label=d.toLocaleDateString(undefined,{month:'long',year:'numeric'});return'&lt;option value="'+m+'"&gt;'+label+'&lt;/option&gt;';}).join('');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>pf.value=pv;sf.value=sv;mf.value=mv;</p>
+<p class="p1">}</p>
+<p class="p1">function renderHistory(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pF=document.getElementById('hist-player-filter')?.value||'',sF=document.getElementById('hist-season-filter')?.value||'',mF=document.getElementById('hist-month-filter')?.value||'';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>let games=state.games;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(pF)games=games.filter(g=&gt;g.scores.some(s=&gt;s.playerId===pF&amp;&amp;s.score!==null));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(sF)games=games.filter(g=&gt;g.seasonId===sF);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(mF)games=games.filter(g=&gt;g.date.startsWith(mF));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const el=document.getElementById('history-list');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!games.length){el.innerHTML='&lt;div class="empty"&gt;&lt;span class="empty-icon"&gt;📭&lt;/span&gt;No games match these filters.&lt;/div&gt;';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>el.innerHTML=games.map(g=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const sorted=g.scores.filter(s=&gt;s.score!==null).slice().sort((a,b)=&gt;b.score-a.score);if(!sorted.length)return'';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const winner=sorted[0],season=state.seasons.find(s=&gt;s.id===g.seasonId);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const chips=sorted.map(s=&gt;{const p=state.players.find(x=&gt;x.id===s.playerId);if(!p)return'';const iW=s.playerId===winner.playerId,yb=s.yahtzees&gt;0?' 🎯'+s.yahtzees:'';return'&lt;div class="chip '+(iW?'chip-win':'')+'"&gt;&lt;span class="chip-em"&gt;'+p.emoji+'&lt;/span&gt;&lt;span class="chip-label"&gt;'+esc(p.name)+': &lt;strong&gt;'+s.score+'&lt;/strong&gt;'+(iW?' 👑':'')+yb+'&lt;/span&gt;&lt;/div&gt;';}).join('');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const d=new Date(g.date+'T12:00:00'),ds=d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const gi=state.games.indexOf(g);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return'&lt;div class="game-item"&gt;&lt;div class="game-hdr"&gt;&lt;div class="game-hdr-left"&gt;&lt;div class="game-num"&gt;Game '+(state.games.length-gi)+'&lt;/div&gt;'+(season?'&lt;div class="game-event-tag"&gt;'+season.emoji+' '+esc(season.name)+'&lt;/div&gt;':'')+'&lt;/div&gt;&lt;div class="game-actions"&gt;&lt;span class="game-dt"&gt;'+ds+'&lt;/span&gt;&lt;button class="btn btn-secondary btn-sm btn-icon-circle" onclick="openEditGame(&amp;apos;"+g.id+"&amp;apos;)"&gt;✏️&lt;/button&gt;&lt;button class="btn btn-danger btn-sm btn-icon-circle" onclick="confirmDeleteGame(&amp;apos;"+g.id+"&amp;apos;)"&gt;🗑&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="chips"&gt;'+chips+'&lt;/div&gt;'+(g.note?'&lt;div class="game-note"&gt;'+esc(g.note)+'&lt;/div&gt;':'')+'&lt;/div&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}).join('');</p>
+<p class="p1">}</p>
+<p class="p1">function openEditGame(id){editingGameId=id;const g=state.games.find(x=&gt;x.id===id);if(!g)return;document.getElementById('edit-game-notes').value=g.note||'';populateSeasonSelect('edit-game-season',g.seasonId||'');const rows=g.scores.map(s=&gt;{const p=state.players.find(x=&gt;x.id===s.playerId);if(!p)return'';return'&lt;div class="edit-score-row"&gt;&lt;span style="font-size:18px;flex-shrink:0;"&gt;'+p.emoji+'&lt;/span&gt;&lt;span class="edit-score-name"&gt;'+esc(p.name)+'&lt;/span&gt;&lt;input type="number" class="edit-score-input" id="escore-'+s.playerId+'" value="'+(s.score!==null?s.score:'')+'" placeholder="—" min="0"&gt;&lt;/div&gt;';}).join('');document.getElementById('edit-game-scores').innerHTML=rows||'&lt;p class="hint"&gt;No scores.&lt;/p&gt;';document.getElementById('edit-game-modal').classList.add('open');}</p>
+<p class="p1">function saveEditGame(){const g=state.games.find(x=&gt;x.id===editingGameId);if(!g)return;g.scores.forEach(s=&gt;{const el=document.getElementById('escore-'+s.playerId);if(el&amp;&amp;el.value!=='')s.score=parseInt(el.value);});g.note=document.getElementById('edit-game-notes').value.trim();g.seasonId=document.getElementById('edit-game-season').value||'';save();closeModal('edit-game-modal');renderHistory();}</p>
+<p class="p1">function confirmDeleteGame(id){delGamePendId=id;document.getElementById('confirm-game-modal').classList.add('open');document.getElementById('confirm-game-del-btn').onclick=()=&gt;{state.games=state.games.filter(g=&gt;g.id!==delGamePendId);save();closeModal('confirm-game-modal');renderHistory();};}</p>
+<p class="p1">function renderSeasons(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const el=document.getElementById('seasons-list');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!state.seasons.length){el.innerHTML='&lt;div class="empty"&gt;&lt;span class="empty-icon"&gt;🏅&lt;/span&gt;No events yet. Create a season to group your games — Christmas tournament, Tuesday League, or whatever you like!&lt;/div&gt;';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>el.innerHTML=state.seasons.map(s=&gt;{const games=state.games.filter(g=&gt;g.seasonId===s.id),stats=getStats(s.id),leader=stats.find(p=&gt;p.wins&gt;0);return'&lt;div class="season-item" onclick="setSeasonFilter(&amp;apos;"+s.id+"&amp;apos;);showPage(&amp;apos;rankings&amp;apos;);"&gt;&lt;span style="font-size:28px;"&gt;'+s.emoji+'&lt;/span&gt;&lt;div style="flex:1;min-width:0;"&gt;&lt;div style="font-weight:700;font-size:15px;"&gt;'+esc(s.name)+'&lt;/div&gt;&lt;div style="font-size:12px;color:var(--text2);margin-top:2px;"&gt;'+games.length+' game'+(games.length!==1?'s':'')+(leader?' · '+leader.emoji+' '+esc(leader.name)+' leads':'')+'&lt;/div&gt;'+(s.desc?'&lt;div style="font-size:11px;color:var(--text3);margin-top:1px;"&gt;'+esc(s.desc)+'&lt;/div&gt;':'')+'&lt;/div&gt;&lt;div style="display:flex;gap:6px;"&gt;&lt;button class="btn btn-secondary btn-sm btn-icon-circle" onclick="event.stopPropagation();openSeasonModal(&amp;apos;"+s.id+"&amp;apos;)"&gt;✏️&lt;/button&gt;&lt;button class="btn btn-danger btn-sm btn-icon-circle" onclick="event.stopPropagation();deleteSeason(&amp;apos;"+s.id+"&amp;apos;)"&gt;🗑&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;';}).join('');</p>
+<p class="p1">}</p>
+<p class="p1">function populateSeasonSelect(elId,val){const el=document.getElementById(elId);if(!el)return;el.innerHTML='&lt;option value=""&gt;— No event —&lt;/option&gt;'+state.seasons.map(s=&gt;'&lt;option value="'+s.id+'"&gt;'+s.emoji+' '+esc(s.name)+'&lt;/option&gt;').join('');el.value=val||'';}</p>
+<p class="p1">function openSeasonModal(id){editingSeasonId=id||null;const s=id?state.seasons.find(x=&gt;x.id===id):null;selSeasonEmoji=s?.emoji||'🏆';document.getElementById('season-modal-title').textContent=id?'Edit Event':'New Event';document.getElementById('season-name-input').value=s?.name||'';document.getElementById('season-desc-input').value=s?.desc||'';renderSeasonEmojiRow();document.getElementById('season-modal').classList.add('open');setTimeout(()=&gt;document.getElementById('season-name-input').focus(),80);}</p>
+<p class="p1">function closeSeasonModal(){closeModal('season-modal');}</p>
+<p class="p1">function renderSeasonEmojiRow(){document.getElementById('season-emoji-row').innerHTML=SEMOJIS.map(e=&gt;'&lt;span onclick="selSeasonEmoji=&amp;apos;"+e+"&amp;apos;;renderSeasonEmojiRow();" style="font-size:24px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid '+(e===selSeasonEmoji?'var(--ga)':'transparent')+';background:'+(e===selSeasonEmoji?'rgba(233,69,96,.12)':'var(--surface2)')+';transition:all .14s;"&gt;'+e+'&lt;/span&gt;').join('');}</p>
+<p class="p1">function saveSeason(){const name=document.getElementById('season-name-input').value.trim();if(!name){showToast('Enter a name!');return;}const desc=document.getElementById('season-desc-input').value.trim();if(editingSeasonId){const s=state.seasons.find(x=&gt;x.id===editingSeasonId);if(s){s.name=name;s.emoji=selSeasonEmoji;s.desc=desc;}}else{state.seasons.push({id:Date.now().toString(),name,emoji:selSeasonEmoji,desc});}save();closeSeasonModal();renderSeasons();}</p>
+<p class="p1">function deleteSeason(id){if(!confirm('Delete this event? Games tagged to it keep their scores.'))return;state.seasons=state.seasons.filter(s=&gt;s.id!==id);state.games.forEach(g=&gt;{if(g.seasonId===id)g.seasonId='';});if(activeSeasonFilter===id)activeSeasonFilter='all';save();renderSeasons();renderSeasonBar();}</p>
+<p class="p1">function openProfile(pid){profPid=pid;const p=state.players.find(x=&gt;x.id===pid);if(!p)return;const s=getStats().find(x=&gt;x.id===pid)||{};document.getElementById('prof-emoji').textContent=p.emoji;document.getElementById('prof-name').textContent=p.name;document.getElementById('prof-sub').textContent=(s.games||0)+' games played';profTab('stats');document.getElementById('profile-modal').classList.add('open');}</p>
+<p class="p1">function closeProfile(){closeModal('profile-modal');}</p>
+<p class="p1">function profTab(tab){['stats','records','h2h','chart'].forEach(t=&gt;{document.getElementById('ptab-'+t).classList.toggle('active',t===tab);document.getElementById('prof-'+t).style.display=t===tab?'block':'none';});if(tab==='stats')renderProfStats();if(tab==='records')renderProfRecords();if(tab==='h2h')renderH2H();if(tab==='chart')renderTrend();}</p>
+<p class="p1">function renderProfStats(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pid=profPid,s=getStats().find(x=&gt;x.id===pid)||{wins:0,avg:0,best:0,worst:0,totalYz:0,curStreak:0,maxStreak:0,games:0,p2nd:0,p3rd:0};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const up=state.games.flatMap(g=&gt;g.scores.filter(x=&gt;x.playerId===pid&amp;&amp;x.upper!==null).map(x=&gt;x.upper));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const lo=state.games.flatMap(g=&gt;g.scores.filter(x=&gt;x.playerId===pid&amp;&amp;x.lower!==null).map(x=&gt;x.lower));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const aU=up.length?Math.round(up.reduce((a,b)=&gt;a+b,0)/up.length):null;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const aL=lo.length?Math.round(lo.reduce((a,b)=&gt;a+b,0)/lo.length):null;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('prof-stats').innerHTML='&lt;div class="stat-grid"&gt;&lt;div class="sg-box"&gt;&lt;div class="sg-num"&gt;'+s.wins+'&lt;/div&gt;&lt;div class="sg-label"&gt;🥇 Wins&lt;/div&gt;&lt;/div&gt;&lt;div class="sg-box"&gt;&lt;div class="sg-num"&gt;'+s.p2nd+'&lt;/div&gt;&lt;div class="sg-label"&gt;🥈 2nds&lt;/div&gt;&lt;/div&gt;&lt;div class="sg-box"&gt;&lt;div class="sg-num"&gt;'+s.p3rd+'&lt;/div&gt;&lt;div class="sg-label"&gt;🥉 3rds&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="stat-grid"&gt;&lt;div class="sg-box"&gt;&lt;div class="sg-num"&gt;'+s.avg+'&lt;/div&gt;&lt;div class="sg-label"&gt;Avg&lt;/div&gt;&lt;/div&gt;&lt;div class="sg-box"&gt;&lt;div class="sg-num"&gt;'+s.best+'&lt;/div&gt;&lt;div class="sg-label"&gt;Best&lt;/div&gt;&lt;/div&gt;&lt;div class="sg-box"&gt;&lt;div class="sg-num"&gt;'+(s.worst||'—')+'&lt;/div&gt;&lt;div class="sg-label"&gt;Worst 😬&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="stat-grid"&gt;&lt;div class="sg-box"&gt;&lt;div class="sg-num"&gt;'+s.totalYz+'&lt;/div&gt;&lt;div class="sg-label"&gt;🎯 Yahtzees&lt;/div&gt;&lt;/div&gt;&lt;div class="sg-box"&gt;&lt;div class="sg-num"&gt;'+s.curStreak+'&lt;/div&gt;&lt;div class="sg-label"&gt;Streak&lt;/div&gt;&lt;/div&gt;&lt;div class="sg-box"&gt;&lt;div class="sg-num"&gt;'+s.maxStreak+'&lt;/div&gt;&lt;div class="sg-label"&gt;Best Streak&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;'+(aU!==null?'&lt;div class="stat-grid"&gt;&lt;div class="sg-box"&gt;&lt;div class="sg-num"&gt;'+aU+'&lt;/div&gt;&lt;div class="sg-label"&gt;Avg Upper&lt;/div&gt;&lt;/div&gt;&lt;div class="sg-box"&gt;&lt;div class="sg-num"&gt;'+aL+'&lt;/div&gt;&lt;div class="sg-label"&gt;Avg Lower&lt;/div&gt;&lt;/div&gt;&lt;div class="sg-box"&gt;&lt;div class="sg-num"&gt;'+s.games+'&lt;/div&gt;&lt;div class="sg-label"&gt;Games&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;':'');</p>
+<p class="p1">}</p>
+<p class="p1">function renderProfRecords(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pid=profPid,s=getStats().find(x=&gt;x.id===pid)||{best:0,worst:0,maxYzG:0,totalYz:0,wins:0,games:0,maxStreak:0};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const bg=state.games.find(g=&gt;g.scores.some(sc=&gt;sc.playerId===pid&amp;&amp;sc.score===s.best));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const wg=state.games.find(g=&gt;g.scores.some(sc=&gt;sc.playerId===pid&amp;&amp;sc.score===s.worst&amp;&amp;s.worst&gt;0));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const bds=bg?new Date(bg.date+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const wds=wg?new Date(wg.date+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('prof-records').innerHTML='&lt;div class="record-row"&gt;&lt;span class="record-label"&gt;🏆 Best game&lt;/span&gt;&lt;span class="record-val"&gt;'+(s.best||'—')+(bds?' · '+bds:'')+'&lt;/span&gt;&lt;/div&gt;&lt;div class="record-row"&gt;&lt;span class="record-label"&gt;😬 Worst game&lt;/span&gt;&lt;span class="record-val"&gt;'+(s.worst||'—')+(wds?' · '+wds:'')+'&lt;/span&gt;&lt;/div&gt;&lt;div class="record-row"&gt;&lt;span class="record-label"&gt;🎯 Most Yahtzees in one game&lt;/span&gt;&lt;span class="record-val"&gt;'+s.maxYzG+'&lt;/span&gt;&lt;/div&gt;&lt;div class="record-row"&gt;&lt;span class="record-label"&gt;🎯 Total Yahtzees&lt;/span&gt;&lt;span class="record-val"&gt;'+s.totalYz+'&lt;/span&gt;&lt;/div&gt;&lt;div class="record-row"&gt;&lt;span class="record-label"&gt;🔥 Longest win streak&lt;/span&gt;&lt;span class="record-val"&gt;'+s.maxStreak+' game'+(s.maxStreak!==1?'s':'')+'&lt;/span&gt;&lt;/div&gt;&lt;div class="record-row"&gt;&lt;span class="record-label"&gt;🥇 Win rate&lt;/span&gt;&lt;span class="record-val"&gt;'+(s.games?Math.round((s.wins/s.games)*100)+'%':'—')+'&lt;/span&gt;&lt;/div&gt;';</p>
+<p class="p1">}</p>
+<p class="p1">function renderH2H(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pid=profPid,el=document.getElementById('prof-h2h');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const others=state.players.filter(p=&gt;p.id!==pid);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!others.length){el.innerHTML='&lt;p class="hint" style="text-align:center;margin-top:.5rem;"&gt;No other players yet.&lt;/p&gt;';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const faced=others.filter(opp=&gt;state.games.some(g=&gt;g.scores.some(s=&gt;s.playerId===pid&amp;&amp;s.score!==null)&amp;&amp;g.scores.some(s=&gt;s.playerId===opp.id&amp;&amp;s.score!==null)));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!faced.length){el.innerHTML='&lt;p class="hint" style="text-align:center;margin-top:.5rem;"&gt;No shared games yet.&lt;/p&gt;';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>el.innerHTML=faced.map(opp=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const shared=state.games.filter(g=&gt;g.scores.some(s=&gt;s.playerId===pid&amp;&amp;s.score!==null)&amp;&amp;g.scores.some(s=&gt;s.playerId===opp.id&amp;&amp;s.score!==null));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const wins=shared.filter(g=&gt;g.scores.filter(s=&gt;s.score!==null).slice().sort((a,b)=&gt;b.score-a.score)[0]?.playerId===pid).length;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const losses=shared.filter(g=&gt;g.scores.filter(s=&gt;s.score!==null).slice().sort((a,b)=&gt;b.score-a.score)[0]?.playerId===opp.id).length;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return'&lt;div class="h2h-row"&gt;&lt;span style="font-size:20px;"&gt;'+opp.emoji+'&lt;/span&gt;&lt;span style="flex:1;font-size:14px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"&gt;'+esc(opp.name)+'&lt;/span&gt;&lt;span style="font-size:14px;white-space:nowrap;"&gt;&lt;span class="h2hw"&gt;'+wins+'W&lt;/span&gt; &lt;span style="color:var(--text3);"&gt;–&lt;/span&gt; &lt;span class="h2hl"&gt;'+losses+'L&lt;/span&gt;&lt;/span&gt;&lt;span style="font-size:11px;color:var(--text2);margin-left:8px;white-space:nowrap;"&gt;'+shared.length+' game'+(shared.length!==1?'s':'')+'&lt;/span&gt;&lt;/div&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}).join('');</p>
+<p class="p1">}</p>
+<p class="p1">function renderTrend(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pid=profPid,scores=getHistory(pid),el=document.getElementById('prof-chart');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(scores.length&lt;2){el.innerHTML='&lt;p class="hint" style="text-align:center;margin-top:.5rem;"&gt;Need at least 2 games to show a trend.&lt;/p&gt;';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const W=320,H=130,pl=36,pr=12,pt=14,pb=26,iW=W-pl-pr,iH=H-pt-pb;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const mn=Math.min(...scores),mx=Math.max(...scores),rng=mx-mn||1;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const xStep=iW/(scores.length-1),yPos=s=&gt;pt+(1-(s-mn)/rng)*iH;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pts=scores.map((s,i)=&gt;pl+i*xStep+','+yPos(s)).join(' ');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const aClose=pl+(scores.length-1)*xStep+','+(H-pb)+' '+pl+','+(H-pb);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const avg=Math.round(scores.reduce((a,b)=&gt;a+b,0)/scores.length),avgY=yPos(avg);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const show=scores.length&lt;=12;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>el.innerHTML='&lt;div class="chart-wrap"&gt;&lt;svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:260px;"&gt;&lt;defs&gt;&lt;linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"&gt;&lt;stop offset="0%" stop-color="#e94560" stop-opacity=".4"/&gt;&lt;stop offset="100%" stop-color="#e94560" stop-opacity="0"/&gt;&lt;/linearGradient&gt;&lt;/defs&gt;&lt;polygon points="'+pts+' '+aClose+'" fill="url(#cg)"/&gt;&lt;line x1="'+pl+'" y1="'+avgY+'" x2="'+(W-pr)+'" y2="'+avgY+'" stroke="#a855f7" stroke-width="1" stroke-dasharray="4,3" opacity=".7"/&gt;&lt;polyline points="'+pts+'" fill="none" stroke="#e94560" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/&gt;'+scores.map((s,i)=&gt;'&lt;circle cx="'+(pl+i*xStep)+'" cy="'+yPos(s)+'" r="'+(show?3.5:2.5)+'" fill="#e94560" stroke="var(--surface2)" stroke-width="1.5"/&gt;').join('')+(show?scores.map((s,i)=&gt;'&lt;text x="'+(pl+i*xStep)+'" y="'+(yPos(s)-8)+'" text-anchor="middle" font-size="10" fill="#8b8baa"&gt;'+s+'&lt;/text&gt;').join(''):'')+'&lt;text x="'+(W-pr)+'" y="'+(avgY-4)+'" text-anchor="end" font-size="10" fill="#a855f7"&gt;avg '+avg+'&lt;/text&gt;&lt;text x="'+pl+'" y="'+(H-8)+'" font-size="10" fill="#5a5a7a"&gt;Game 1&lt;/text&gt;&lt;text x="'+(W-pr)+'" y="'+(H-8)+'" text-anchor="end" font-size="10" fill="#5a5a7a"&gt;Latest&lt;/text&gt;'+(!show?'&lt;text x="'+W/2+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="#5a5a7a"&gt;'+scores.length+' games&lt;/text&gt;':'')+'&lt;/svg&gt;&lt;/div&gt;';</p>
+<p class="p1">}</p>
+<p class="p1">function rematchFromProfile(){closeProfile();const pids=lastGamePlayers.length?lastGamePlayers:(state.games.length?state.games[0].scores.map(s=&gt;s.playerId):[]);if(pids.length){lastGamePlayers=pids;showPage('games');renderGamePage(pids);document.getElementById('rematch-modal').classList.add('open');}else showPage('games');}</p>
+<p class="p1">function openScreenshot(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const sid=activeSeasonFilter==='all'?null:activeSeasonFilter;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const ranked=getStats(sid).filter(p=&gt;p.games&gt;0);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const games=fGames(sid),season=state.seasons.find(s=&gt;s.id===activeSeasonFilter);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const now=new Date().toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('scr-wrap').innerHTML='&lt;div class="scr-wrap"&gt;&lt;div class="scr-header"&gt;&lt;div class="scr-title"&gt;'+(season?season.emoji+' '+esc(season.name):'🎲 Yahtzee Tournament')+'&lt;/div&gt;&lt;div class="scr-sub"&gt;'+games.length+' games · '+now+'&lt;/div&gt;&lt;/div&gt;'+ranked.map((p,i)=&gt;{const m=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';return'&lt;div class="scr-row"&gt;&lt;div class="scr-rank"&gt;'+m+'&lt;/div&gt;&lt;div class="scr-av"&gt;'+p.emoji+'&lt;/div&gt;&lt;div class="scr-name"&gt;'+esc(p.name)+'&lt;/div&gt;&lt;div class="scr-stats"&gt;&lt;div class="scr-wins"&gt;'+p.wins+'&lt;/div&gt;&lt;div class="scr-avg"&gt;avg '+p.avg+'&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;';}).join('')+'&lt;div class="scr-footer"&gt;🎯 Yahtzee Tournament Tracker&lt;/div&gt;&lt;/div&gt;';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('screenshot-modal').classList.add('open');</p>
+<p class="p1">}</p>
+<p class="p1">function closeScreenshot(){closeModal('screenshot-modal');}</p>
+<p class="p1">function copyShareText(){const sid=activeSeasonFilter==='all'?null:activeSeasonFilter;const ranked=getStats(sid).filter(p=&gt;p.games&gt;0);const season=state.seasons.find(s=&gt;s.id===activeSeasonFilter);let txt=(season?season.emoji+' '+season.name:'🎲 Yahtzee Tournament')+'\n'+'═'.repeat(28)+'\n';ranked.forEach((p,i)=&gt;{const m=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';txt+=m+' '+p.emoji+' '+p.name+': '+p.wins+'W · avg '+p.avg+' · 🎯'+p.totalYz+'\n';});txt+='─'.repeat(28)+'\n'+fGames(sid).length+' games played';navigator.clipboard.writeText(txt).then(()=&gt;showToast('Copied!'));}</p>
+<p class="p1">function renderMore(){const ranked=getStats().filter(p=&gt;p.games&gt;0);const allSc=state.games.flatMap(g=&gt;g.scores.filter(s=&gt;s.score!==null).map(s=&gt;s.score));let txt='🎲 YAHTZEE TOURNAMENT\n'+'═'.repeat(28)+'\n';ranked.forEach((p,i)=&gt;{const m=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';txt+=m+' '+p.emoji+' '+p.name+': '+p.wins+'W · avg '+p.avg+' · 🎯'+p.totalYz+'\n';});txt+='─'.repeat(28)+'\n'+state.games.length+' games · High score: '+(allSc.length?Math.max(...allSc):'—');document.getElementById('share-text').textContent=txt;}</p>
+<p class="p1">function copyShare(e){navigator.clipboard.writeText(document.getElementById('share-text').textContent).then(()=&gt;{const b=e.target;b.textContent='✅ Copied!';setTimeout(()=&gt;{b.textContent='📋 Copy to Clipboard';},2000);});}</p>
+<p class="p1">function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='yahtzee-backup-'+new Date().toISOString().split('T')[0]+'.json';a.click();}</p>
+<p class="p1">function importData(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=&gt;{try{const imp=JSON.parse(ev.target.result);if(!imp.players||!imp.games)throw new Error();if(!confirm('Import '+imp.players.length+' players + '+imp.games.length+' games? Replaces current data.'))return;state=imp;if(!state.seasons)state.seasons=[];save();renderMore();showToast('Imported!');}catch{showToast('Invalid backup file.');}};r.readAsText(file);e.target.value='';}</p>
+<p class="p1">function confirmResetAll(){document.getElementById('confirm-reset-modal').classList.add('open');}</p>
+<p class="p1">function doResetAll(){state={players:[],games:[],seasons:[]};save();closeModal('confirm-reset-modal');activeSeasonFilter='all';showPage('rankings');}</p>
+<p class="p1">function openPlayerModal(id){editingPid=id||null;selEmoji=id?(state.players.find(p=&gt;p.id===id)?.emoji||'😀'):'😀';document.getElementById('modal-title').textContent=id?'Edit Player':'New Player';document.getElementById('pname-input').value=id?(state.players.find(p=&gt;p.id===id)?.name||''):'';renderEmojiGrid();document.getElementById('player-modal').classList.add('open');setTimeout(()=&gt;document.getElementById('pname-input').focus(),80);}</p>
+<p class="p1">function closePlayerModal(){closeModal('player-modal');}</p>
+<p class="p1">function renderEmojiGrid(){document.getElementById('emoji-grid').innerHTML=EMOJIS.map(e=&gt;'&lt;button class="emoji-btn '+(e===selEmoji?'selected':'')+'" onclick="selE(&amp;apos;"+e+"&amp;apos;)"&gt;'+e+'&lt;/button&gt;').join('');}</p>
+<p class="p1">function selE(e){selEmoji=e;renderEmojiGrid();}</p>
+<p class="p1">function savePlayer(){const name=document.getElementById('pname-input').value.trim();if(!name){showToast('Enter a name!');return;}if(editingPid){const p=state.players.find(x=&gt;x.id===editingPid);if(p){p.name=name;p.emoji=selEmoji;}}else state.players.push({id:Date.now().toString(),name,emoji:selEmoji});save();closePlayerModal();renderPlayers();}</p>
+<p class="p1">function confirmDelete(id){delPendId=id;document.getElementById('confirm-modal').classList.add('open');document.getElementById('confirm-del-btn').onclick=doDelete;}</p>
+<p class="p1">function doDelete(){if(!delPendId)return;state.players=state.players.filter(p=&gt;p.id!==delPendId);state.games=state.games.map(g=&gt;({...g,scores:g.scores.filter(s=&gt;s.playerId!==delPendId)})).filter(g=&gt;g.scores.length&gt;0);save();closeModal('confirm-modal');renderPlayers();}</p>
+<p class="p1">function esc(s){return String(s).replace(/&amp;/g,'&amp;amp;').replace(/&lt;/g,'&amp;lt;').replace(/&gt;/g,'&amp;gt;');}</p>
+<p class="p1">document.querySelectorAll('.modal-overlay').forEach(el=&gt;{el.addEventListener('click',e=&gt;{if(e.target===el)el.classList.remove('open');});});</p>
+<p class="p1">if('serviceWorker' in navigator){const sw="const C='yahtzee-v3';self.addEventListener('install',e=&gt;{e.waitUntil(caches.open(C).then(c=&gt;c.addAll([self.location.pathname])));self.skipWaiting();});self.addEventListener('activate',e=&gt;{e.waitUntil(caches.keys().then(k=&gt;Promise.all(k.filter(x=&gt;x!==C).map(x=&gt;caches.delete(x)))));self.clients.claim();});self.addEventListener('fetch',e=&gt;{e.respondWith(caches.match(e.request).then(r=&gt;r||fetch(e.request).then(res=&gt;{const cl=res.clone();caches.open(C).then(c=&gt;c.put(e.request,cl));return res;})));});";navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=&gt;{});}</p>
+<p class="p1">load();renderRankings();setTimeout(()=&gt;{document.getElementById('loader').classList.add('hidden');setTimeout(()=&gt;startTutorial(),600);},900);</p>
+<p class="p2"><br></p>
+<p class="p1">// ═══════════════════════════════════════════════</p>
+<p class="p1">// TUTORIAL SYSTEM — Dizzy the Dice</p>
+<p class="p1">// ═══════════════════════════════════════════════</p>
+<p class="p1">const TUT_KEY = 'yahtzee_tut_done';</p>
+<p class="p1">let tutStep = 0, tutActive = false;</p>
+<p class="p2"><br></p>
+<p class="p1">const STEPS = [</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>page: 'rankings',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>target: 'page-rankings',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>anchor: 'bottom',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>mascot: '🎲',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>label: 'Step 1 of 10 — Welcome!',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text: "Hey! I'm Dizzy 🎲 I'll show you around in about 2 minutes. This is your &lt;strong&gt;Rankings page&lt;/strong&gt; — your tournament leaderboard lives here. Wins, streaks, Yahtzee counts… it all shows up once you start playing!"</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>page: 'rankings',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>target: 'stat-strip',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>anchor: 'bottom',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>mascot: '🎲',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>label: 'Step 2 of 10 — Stats bar',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text: "These four boxes give you a quick snapshot: total games played, player count, the all-time high score, and how many Yahtzees have been rolled across all games. Bragging rights, right there."</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>page: 'players',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>target: 'page-players',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>anchor: 'bottom',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>mascot: '😎',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>label: 'Step 3 of 10 — Players',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text: "This is where you set up your competitors! Tap &lt;strong&gt;＋ Add Player&lt;/strong&gt;, pick an emoji avatar, and give them a name. Add everyone who's going to play in your tournament — you can always add more later."</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>page: 'games',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>target: 'quick-start-banner',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>anchor: 'bottom',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>fallback: 'page-games',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>mascot: '⚡',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>label: 'Step 4 of 10 — Quick Start',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text: "After your first game, this golden banner appears. Tap it to instantly load the same players as last time — no ticking checkboxes every session. Great for your regular Tuesday night crew."</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>page: 'games',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>target: 'game-step1',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>anchor: 'bottom',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>fallback: 'page-games',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>mascot: '👥',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>label: "Step 5 of 10 — Who's playing?",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text: "Tick the players joining &lt;em&gt;this&lt;/em&gt; game — handy when someone sits out. You can also tag the game to a &lt;strong&gt;Season or Event&lt;/strong&gt; here (like 'Christmas Tournament') to keep things organised."</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>page: 'games',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>target: 'page-games',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>anchor: 'center',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>mascot: '🎯',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>label: 'Step 6 of 10 — Entering scores',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text: "On the next screen you enter each player's &lt;strong&gt;Upper&lt;/strong&gt; score (Aces–Sixes) and &lt;strong&gt;Lower&lt;/strong&gt; score (Three of a Kind through Yahtzee). The total calculates automatically. Hit &lt;strong&gt;+&lt;/strong&gt; for every Yahtzee someone rolled — we track those separately!"</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>page: 'history',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>target: 'history-filters',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>anchor: 'bottom',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>mascot: '📋',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>label: 'Step 7 of 10 — History &amp; filters',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text: "Every game you save appears here. Use the three dropdowns to filter by &lt;strong&gt;player&lt;/strong&gt;, &lt;strong&gt;event&lt;/strong&gt;, or &lt;strong&gt;month&lt;/strong&gt;. You can also edit a game score after the fact with the ✏️ button — no more arguments about typos!"</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>page: 'seasons',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>target: 'page-seasons',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>anchor: 'bottom',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>mascot: '🏅',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>label: 'Step 8 of 10 — Seasons &amp; Events',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text: "Create named events like &lt;em&gt;Christmas 2025&lt;/em&gt; or &lt;em&gt;Tuesday League&lt;/em&gt; and tag your games to them. Then filter the leaderboard to that event using the pills at the top of Rankings. Perfect for keeping your Christmas tournament separate from regular play."</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>page: 'rankings',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>target: 'lb-list',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>anchor: 'top',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>mascot: '🏆',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>label: 'Step 9 of 10 — Player profiles',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text: "Tap any player row on the leaderboard to open their &lt;strong&gt;profile&lt;/strong&gt;. You'll find wins, 2nds, 3rds, streaks, best/worst games, head-to-head records against every other player, and a score trend chart. Also a 🎲 Rematch button to quick-restart with the same lineup."</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>page: 'more',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>target: 'page-more',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>anchor: 'center',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>mascot: '📸',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>label: 'Step 10 of 10 — Sharing &amp; backup',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text: "Tap &lt;strong&gt;📸 Screenshot Card&lt;/strong&gt; to generate a beautiful share card — screenshot it and drop it in your family group chat. Export a JSON backup anytime to keep your data safe. That's everything! Tap the &lt;strong&gt;❓&lt;/strong&gt; button in the nav to replay this tour any time. Now go roll some Yahtzees! 🎲"</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1">];</p>
+<p class="p2"><br></p>
+<p class="p1">function startTutorial(force) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!force &amp;&amp; localStorage.getItem(TUT_KEY)) return;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>tutStep = 0;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>tutActive = true;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('tut-overlay').style.display = 'block';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>showTutStep();</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function endTutorial() {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>tutActive = false;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>localStorage.setItem(TUT_KEY, '1');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>['tut-overlay','tut-spotlight','tut-bubble'].forEach(id =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById(id).style.display = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>// remove any highlight rings</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.querySelectorAll('.tut-highlight').forEach(el =&gt; el.classList.remove('tut-highlight'));</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function tutNext() {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.querySelectorAll('.tut-highlight').forEach(el =&gt; el.classList.remove('tut-highlight'));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>tutStep++;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (tutStep &gt;= STEPS.length) { endTutorial(); return; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>showTutStep();</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function showTutStep() {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const step = STEPS[tutStep];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const isLast = tutStep === STEPS.length - 1;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// Navigate to correct page</p>
+<p class="p1"><span class="Apple-converted-space">  </span>showPage(step.page);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// Wait for page render</p>
+<p class="p1"><span class="Apple-converted-space">  </span>requestAnimationFrame(() =&gt; setTimeout(() =&gt; positionTutStep(step, isLast), 80));</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function positionTutStep(step, isLast) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>// Find target element</p>
+<p class="p1"><span class="Apple-converted-space">  </span>let target = document.getElementById(step.target);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!target || !isVisible(target)) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>target = document.getElementById(step.fallback || step.target);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const bubble = document.getElementById('tut-bubble');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const spotlight = document.getElementById('tut-spotlight');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const arrow = document.getElementById('tut-arrow');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// Update content</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('tut-mascot').textContent = step.mascot;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('tut-step-label').textContent = step.label;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('tut-text').innerHTML = step.text;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById("tut-next-btn").textContent = isLast ? "Done! 🎲" : "Next →";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// Dots</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('tut-dots').innerHTML = STEPS.map((_,i) =&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>'&lt;div style="width:' + (i===tutStep?'18':'6') + 'px;height:6px;border-radius:3px;background:' + (i===tutStep?'#a855f7':i&lt;tutStep?'#4ade80':'rgba(255,255,255,.15)') + ';transition:all .2s;"&gt;&lt;/div&gt;'</p>
+<p class="p1"><span class="Apple-converted-space">  </span>).join('');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>bubble.style.display = 'block';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>spotlight.style.display = 'block';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>arrow.style.display = 'none';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!target || step.anchor === 'center') {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Center bubble, no spotlight</p>
+<p class="p1"><span class="Apple-converted-space">    </span>spotlight.style.display = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>Object.assign(bubble.style, {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>top: '50%', left: '50%',</p>
+<p class="p1"><span class="Apple-converted-space">      </span>transform: 'translate(-50%,-50%)',</p>
+<p class="p1"><span class="Apple-converted-space">      </span>bottom: 'auto', right: 'auto'</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// Spotlight the target</p>
+<p class="p1"><span class="Apple-converted-space">  </span>target.classList.add('tut-highlight');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const rect = target.getBoundingClientRect();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const pad = 6;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>Object.assign(spotlight.style, {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>left: (rect.left - pad) + 'px',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>top: (rect.top - pad) + 'px',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>width: (rect.width + pad*2) + 'px',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>height: (rect.height + pad*2) + 'px',</p>
+<p class="p1"><span class="Apple-converted-space">    </span>display: 'block'</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// Position bubble above or below</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const vw = window.innerWidth;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const vh = window.innerHeight;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const bubbleW = Math.min(290, vw * 0.88);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const spaceBelow = vh - rect.bottom;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const spaceAbove = rect.top;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const placeBelow = spaceBelow &gt; 220 || spaceBelow &gt; spaceAbove;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// Reset positioning</p>
+<p class="p1"><span class="Apple-converted-space">  </span>bubble.style.transform = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>bubble.style.top = bubble.style.bottom = bubble.style.left = bubble.style.right = 'auto';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const bubbleLeft = Math.max(8, Math.min(rect.left + rect.width/2 - bubbleW/2, vw - bubbleW - 8));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>bubble.style.left = bubbleLeft + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>bubble.style.width = bubbleW + 'px';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (placeBelow) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>bubble.style.top = (rect.bottom + pad + 12) + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Arrow up</p>
+<p class="p1"><span class="Apple-converted-space">    </span>arrow.style.display = 'block';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>arrow.style.top = '-8px';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>arrow.style.bottom = 'auto';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>arrow.style.left = (rect.left + rect.width/2 - bubbleLeft - 7) + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>arrow.style.borderBottom = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>arrow.style.borderRight = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>bubble.style.bottom = (vh - rect.top + pad + 12) + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Arrow down</p>
+<p class="p1"><span class="Apple-converted-space">    </span>arrow.style.display = 'block';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>arrow.style.bottom = '-8px';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>arrow.style.top = 'auto';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>arrow.style.left = (rect.left + rect.width/2 - bubbleLeft - 7) + 'px';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>arrow.style.borderTop = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>arrow.style.borderLeft = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function isVisible(el) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if (!el) return false;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const r = el.getBoundingClientRect();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return r.width &gt; 0 &amp;&amp; r.height &gt; 0 &amp;&amp; r.top &lt; window.innerHeight &amp;&amp; r.bottom &gt; 0;</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
