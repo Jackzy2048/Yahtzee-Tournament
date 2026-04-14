@@ -327,7 +327,7 @@ label:first-child{margin-top:0;}
 <div class="modal-overlay" id="edit-game-modal"><div class="modal"><div class="mtitle">Edit Game</div><div id="edit-game-scores"></div><label>Event</label><select id="edit-game-season"></select><label>Notes</label><textarea id="edit-game-notes" placeholder="Notes…"></textarea><div class="flex gap-sm mt"><button class="btn btn-secondary" style="flex:1" onclick="closeModal('edit-game-modal')">Cancel</button><button class="btn btn-primary" style="flex:1" onclick="saveEditGame()">Save Changes</button></div></div></div>
 <div class="modal-overlay" id="rematch-modal"><div class="modal"><div class="mtitle">🎲 Rematch!</div><p style="color:var(--text2);font-size:14px;margin-bottom:1rem;line-height:1.6;">Same players loaded. Head to New Game!</p><button class="btn btn-gold btn-full" onclick="closeModal('rematch-modal');showPage('games');">Let's go! 🎯</button><button class="btn btn-secondary btn-full mtsm" onclick="closeModal('rematch-modal')">Cancel</button></div></div>
 <script>
-const EMOJIS=['😀','😎','🤩','🥳','😤','😈','👑','🦁','🐯','🦊','🐸','🦄','🐼','🦋','🐉','🦖','🐺','🦅','🦝','🐮','🍕','🍦','🎯','⚡','🔥','💎','🌟','🚀','🎸','🏆','🎪','🌈','🧙','🥷','🤠','🦸','🧜','🧚','🤖','👾','🎳','🎲','🃏','♟️','🎭','🌊','🦩','🐧'];
+const EMOJIS=['😀','😎','🤩','🥳','😤','😈','🤓','😂','🥰','😏','🤯','🤑','👑','🤡','💀','👻','🎃','🦸','🦹','🧙','🥷','🤠','🧜','🧚','🤖','👾','🧌','🧝','🧛','🦊','🐯','🦁','🐻','🐼','🐨','🦄','🐸','🐙','🦋','🐉','🦖','🐺','🦅','🦝','🐮','🐷','🐸','🐵','🙈','🦒','🦓','🦏','🐘','🦛','🦍','🦧','🐆','🐅','🦬','🐃','🐂','🐄','🐎','🦌','🐑','🐏','🦙','🐐','🦘','🦥','🦦','🦨','🦡','🐿️','🦔','🐇','🐁','🐀','🦫','🦎','🐊','🐢','🐍','🦕','🐓','🦃','🦤','🦚','🦜','🦩','🦢','🕊️','🐧','🐦','🦅','🦆','🦉','🦇','🐝','🪱','🐛','🦋','🐌','🐞','🐜','🪲','🦟','🦗','🪳','🦂','🐠','🐡','🐟','🐬','🐳','🐋','🦈','🐊','🐙','🦑','🦐','🦞','🦀','🐚','🪸','🌊','🏆','🎲','🎯','⚡','🔥','💎','🌟','🚀','🎸','🎪','🌈','🍕','🍦','🎳','🃏','♟️','🎭','👑'];
 const SEMOJIS=['🏆','🎄','🎂','🌞','🌙','❄️','🎉','🏠','🎮','🎯','⭐','🔥','🌈','🎪','🏅'];
 let state={players:[],games:[],seasons:[]};
 let editingPid=null,selEmoji='😀',delPendId=null,profPid=null,lightMode=false;
@@ -405,11 +405,15 @@ function renderMonthlySummary(){
   el.innerHTML='<div class="monthly-card"><div class="monthly-title">📅 '+mn+' so far</div><div class="monthly-body">'+mg.length+' game'+(mg.length!==1?'s':'')+' played'+(tp?' · <strong>'+tp.emoji+' '+esc(tp.name)+'</strong> leading with '+wc[tid]+' win'+(wc[tid]!==1?'s':''):'')+'.'+( tyz>0?'<br>🎯 '+tyz+' Yahtzee'+(tyz!==1?'s':'')+' rolled this month.':'')+'</div></div>';
 }
 function renderSeasonBar(){
-  const bar=document.getElementById('rankings-season-bar');
+  var bar=document.getElementById('rankings-season-bar');
   if(!state.seasons.length){bar.innerHTML='';return;}
-  const pills=[{id:'all',label:'All time',emoji:''},...state.seasons.map(s=>({id:s.id,label:s.name,emoji:s.emoji}))];
-  bar.innerHTML=pills.map(p=>'<span class="season-pill '+(activeSeasonFilter===p.id?'active':'')+'" onclick="setSeasonFilter(&apos;"+p.id+"&apos;)">'+(p.emoji?p.emoji+' ':'')+esc(p.label)+'</span>').join('');
+  var pills=[{id:'all',label:'All time',emoji:''}].concat(state.seasons.map(function(s){return{id:s.id,label:s.name,emoji:s.emoji};}));
+  bar.innerHTML=pills.map(function(p){
+    var active=activeSeasonFilter===p.id?'active':'';
+    return '<span class="season-pill '+active+'" onclick="setSeasonFilter('+p.id+')">'+(p.emoji?p.emoji+' ':'')+esc(p.label)+'</span>';
+  }).join('');
 }
+
 function setSeasonFilter(id){activeSeasonFilter=id;renderSeasonBar();renderLeaderboard();}
 function renderRankings(){renderMonthlySummary();renderSeasonBar();renderLeaderboard();}
 function renderLeaderboard(){
@@ -434,7 +438,7 @@ function renderLeaderboard(){
     const yz=p.totalYz>0?'<span class="badge byahtzee">🎯 '+p.totalYz+'</span>':'';
     const pod=(p.p2nd>0||p.p3rd>0)?'<span class="badge bpodium">🥈×'+p.p2nd+' 🥉×'+p.p3rd+'</span>':'';
     const sub=(fire||yz||pod)?'<div class="bdgs">'+fire+yz+pod+'</div>':'<div class="lb-sub">'+p.games+' game'+(p.games!==1?'s':'')+' · avg '+p.avg+' · best '+p.best+'</div>';
-    return'<div class="lb-row'+(i===0&&p.wins>0?' first-row':'')+'" onclick="openProfile(&apos;"+p.id+"&apos;)">'
+    return'<div class="lb-row'+(i===0&&p.wins>0?' first-row':'')+'" onclick="openProfile("+p.id+")">'
       +'<div class="lb-bar" style="width:'+(p.wins?Math.round((p.wins/maxW)*100):0)+'%;background:'+barC+';"></div>'
       +'<div class="lb-glow"></div>'
       +'<div class="lb-rank">'+medal+'</div>'
@@ -449,7 +453,7 @@ function renderPlayers(){
   const el=document.getElementById('players-list');
   if(!state.players.length){el.innerHTML='<div class="empty"><span class="empty-icon">🎳</span>No players yet!</div>';return;}
   const stats=getStats();
-  el.innerHTML=state.players.map(p=>{const s=stats.find(x=>x.id===p.id)||{games:0,wins:0,avg:0};return'<div class="player-item"><div class="pav">'+p.emoji+'</div><div style="flex:1;cursor:pointer;min-width:0;" onclick="openProfile(&apos;"+p.id+"&apos;)"><div class="pname">'+esc(p.name)+'</div><div class="pstats">'+s.games+' games · '+s.wins+' wins · avg '+s.avg+'</div></div><div class="pacts"><button class="btn btn-secondary btn-sm btn-icon-circle" onclick="event.stopPropagation();openPlayerModal(&apos;"+p.id+"&apos;)">✏️</button><button class="btn btn-danger btn-sm btn-icon-circle" onclick="event.stopPropagation();confirmDelete(&apos;"+p.id+"&apos;)">🗑</button></div></div>';}).join('');
+  el.innerHTML=state.players.map(p=>{const s=stats.find(x=>x.id===p.id)||{games:0,wins:0,avg:0};return'<div class="player-item"><div class="pav">'+p.emoji+'</div><div style="flex:1;cursor:pointer;min-width:0;" onclick="openProfile("+p.id+")"><div class="pname">'+esc(p.name)+'</div><div class="pstats">'+s.games+' games · '+s.wins+' wins · avg '+s.avg+'</div></div><div class="pacts"><button class="btn btn-secondary btn-sm btn-icon-circle" onclick="event.stopPropagation();openPlayerModal(\"+p.id+\")">✏️</button><button class="btn btn-danger btn-sm btn-icon-circle" onclick="event.stopPropagation();confirmDelete(\"+p.id+\")">🗑</button></div></div>';}).join('');
 }
 function renderGamePage(pre){
   const noP=document.getElementById('game-no-players'),s1=document.getElementById('game-step1'),s2=document.getElementById('game-step2'),qs=document.getElementById('quick-start-banner');
@@ -461,7 +465,7 @@ function renderGamePage(pre){
   renderPlayerSelect();populateSeasonSelect('game-season-select','');
 }
 function quickStart(){if(!lastGamePlayers.length)return;selectedPids=new Set(lastGamePlayers.filter(id=>state.players.find(p=>p.id===id)));goToStep2();}
-function renderPlayerSelect(){document.getElementById('player-select-grid').innerHTML=state.players.map(p=>{const sel=selectedPids.has(p.id);return'<div class="ps-row'+(sel?' selected':'')+'" onclick="togglePS(&apos;"+p.id+"&apos;)">'+'<div class="ps-check">'+(sel?'✓':'')+'</div><div class="pav" style="width:36px;height:36px;font-size:19px;">'+p.emoji+'</div><span style="font-size:14px;font-weight:600;">'+esc(p.name)+'</span></div>';}).join('');}
+function renderPlayerSelect(){document.getElementById('player-select-grid').innerHTML=state.players.map(p=>{const sel=selectedPids.has(p.id);return'<div class="ps-row'+(sel?' selected':'')+'" onclick="togglePS(\"+p.id+\")">'+'<div class="ps-check">'+(sel?'✓':'')+'</div><div class="pav" style="width:36px;height:36px;font-size:19px;">'+p.emoji+'</div><span style="font-size:14px;font-weight:600;">'+esc(p.name)+'</span></div>';}).join('');}
 function togglePS(pid){if(selectedPids.has(pid))selectedPids.delete(pid);else selectedPids.add(pid);renderPlayerSelect();}
 function goToStep2(){
   if(selectedPids.size===0){showToast('Select at least one player!');return;}
@@ -469,11 +473,50 @@ function goToStep2(){
   document.getElementById('game-date').value=new Date().toISOString().split('T')[0];document.getElementById('game-notes').value='';
   gYahtzees={};state.players.forEach(p=>{gYahtzees[p.id]=0;});
   const active=state.players.filter(p=>selectedPids.has(p.id));
-  document.getElementById('score-entry-list').innerHTML=active.map(p=>'<div class="score-entry-row"><div class="ser-top"><span style="font-size:24px;flex-shrink:0;">'+p.emoji+'</span><span class="ser-name">'+esc(p.name)+'</span><span class="ser-total" id="stot-'+p.id+'">—</span></div><div class="ser-bd"><div class="ser-sub"><span class="ser-sublabel">Upper <span class="ser-tip">(Aces–Sixes)</span></span><input type="number" class="ser-subinput" id="upper-'+p.id+'" placeholder="—" min="0" max="105" oninput="updateTot(&apos;"+p.id+"&apos;)"></div><div class="ser-sub"><span class="ser-sublabel">Lower <span class="ser-tip">(3-of-a-Kind–Yahtzee)</span></span><input type="number" class="ser-subinput" id="lower-'+p.id+'" placeholder="—" min="0" max="1470" oninput="updateTot(&apos;"+p.id+"&apos;)"></div></div><div class="yctr"><span class="yclabel">🎯 Yahtzees rolled</span><button class="ycbtn" onclick="adjY(&apos;"+p.id+"&apos;,-1,this)">−</button><span class="ycval" id="yc-'+p.id+'">0</span><button class="ycbtn" onclick="adjY(&apos;"+p.id+"&apos;,1,this)">+</button></div></div>').join('');
+  document.getElementById('score-entry-list').innerHTML=active.map(function(p){
+    return '<div class="score-entry-row">'
+      +'<div class="ser-top">'
+      +'<span style="font-size:24px;flex-shrink:0;">'+p.emoji+'</span>'
+      +'<span class="ser-name">'+esc(p.name)+'</span>'
+      +'<span class="ser-total" id="stot-'+p.id+'">—</span>'
+      +'</div>'
+      +'<div class="ser-bd">'
+      +'<div class="ser-sub"><span class="ser-sublabel">Upper <span class="ser-tip">(Aces–Sixes)</span></span>'
+      +'<input type="number" class="ser-subinput" id="upper-'+p.id+'" placeholder="—" min="0" max="105" oninput="updateTot(this)"></div>'
+      +'<div class="ser-sub"><span class="ser-sublabel">Lower <span class="ser-tip">(3-of-a-Kind–Yahtzee)</span></span>'
+      +'<input type="number" class="ser-subinput" id="lower-'+p.id+'" placeholder="—" min="0" max="1470" oninput="updateTot(this)"></div>'
+      +'</div>'
+      +'<div class="yctr">'
+      +'<span class="yclabel">🎯 Yahtzees rolled</span>'
+      +'<button class="ycbtn" data-pid="'+p.id+'" data-dir="-1" type="button">−</button>'
+      +'<span class="ycval" id="yc-'+p.id+'">0</span>'
+      +'<button class="ycbtn" data-pid="'+p.id+'" data-dir="1" type="button">+</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+  wireYcBtns();
 }
 function goToStep1(){document.getElementById('game-step2').style.display='none';document.getElementById('game-step1').style.display='block';if(lastGamePlayers.length)document.getElementById('quick-start-banner').style.display='flex';}
-function updateTot(pid){const u=document.getElementById('upper-'+pid)?.value,l=document.getElementById('lower-'+pid)?.value,el=document.getElementById('stot-'+pid);if(el)el.textContent=(u===''&&l==='')?'—':(parseInt(u||0)+parseInt(l||0));}
-function adjY(pid,d,btn){gYahtzees[pid]=Math.max(0,(gYahtzees[pid]||0)+d);document.getElementById('yc-'+pid).textContent=gYahtzees[pid];btn.style.transform='scale(.82)';setTimeout(()=>btn.style.transform='',150);}
+function updateTot(inputEl){
+  var row=inputEl.closest('.score-entry-row');
+  if(!row)return;
+  var u=row.querySelector('[id^=upper-]'),l=row.querySelector('[id^=lower-]');
+  var uv=u?u.value:'', lv=l?l.value:'';
+  var tot=row.querySelector('.ser-total');
+  if(tot)tot.textContent=(uv===''&&lv==='')?'—':(parseInt(uv||0)+parseInt(lv||0));
+}
+function adjY(pid,d){
+  gYahtzees[pid]=Math.max(0,(gYahtzees[pid]||0)+d);
+  var el=document.getElementById('yc-'+pid);
+  if(el)el.textContent=gYahtzees[pid];
+}
+// Wire up ycbtn clicks via direct DOM after render
+function wireYcBtns(){
+  var btns=document.querySelectorAll('.ycbtn[data-pid]');
+  btns.forEach(function(b){
+    b.onclick=function(){adjY(this.dataset.pid,parseInt(this.dataset.dir));};
+  });
+}
 function saveGame(){
   const active=state.players.filter(p=>selectedPids.has(p.id));
   const scores=active.map(p=>{const u=document.getElementById('upper-'+p.id)?.value,l=document.getElementById('lower-'+p.id)?.value;if(u===''&&l==='')return null;const up=u!==''?parseInt(u):null,lo=l!==''?parseInt(l):null;return{playerId:p.id,score:(up||0)+(lo||0),upper:up,lower:lo,yahtzees:gYahtzees[p.id]||0};}).filter(Boolean);
@@ -528,21 +571,41 @@ function renderHistory(){
     const chips=sorted.map(s=>{const p=state.players.find(x=>x.id===s.playerId);if(!p)return'';const iW=s.playerId===winner.playerId,yb=s.yahtzees>0?' 🎯'+s.yahtzees:'';return'<div class="chip '+(iW?'chip-win':'')+'"><span class="chip-em">'+p.emoji+'</span><span class="chip-label">'+esc(p.name)+': <strong>'+s.score+'</strong>'+(iW?' 👑':'')+yb+'</span></div>';}).join('');
     const d=new Date(g.date+'T12:00:00'),ds=d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});
     const gi=state.games.indexOf(g);
-    return'<div class="game-item"><div class="game-hdr"><div class="game-hdr-left"><div class="game-num">Game '+(state.games.length-gi)+'</div>'+(season?'<div class="game-event-tag">'+season.emoji+' '+esc(season.name)+'</div>':'')+'</div><div class="game-actions"><span class="game-dt">'+ds+'</span><button class="btn btn-secondary btn-sm btn-icon-circle" onclick="openEditGame(&apos;"+g.id+"&apos;)">✏️</button><button class="btn btn-danger btn-sm btn-icon-circle" onclick="confirmDeleteGame(&apos;"+g.id+"&apos;)">🗑</button></div></div><div class="chips">'+chips+'</div>'+(g.note?'<div class="game-note">'+esc(g.note)+'</div>':'')+'</div>';
+    return'<div class="game-item"><div class="game-hdr"><div class="game-hdr-left"><div class="game-num">Game '+(state.games.length-gi)+'</div>'+(season?'<div class="game-event-tag">'+season.emoji+' '+esc(season.name)+'</div>':'')+'</div><div class="game-actions"><span class="game-dt">'+ds+'</span><button class="btn btn-secondary btn-sm btn-icon-circle" onclick="openEditGame(\"+g.id+\")">✏️</button><button class="btn btn-danger btn-sm btn-icon-circle" onclick="confirmDeleteGame(\"+g.id+\")">🗑</button></div></div><div class="chips">'+chips+'</div>'+(g.note?'<div class="game-note">'+esc(g.note)+'</div>':'')+'</div>';
   }).join('');
 }
 function openEditGame(id){editingGameId=id;const g=state.games.find(x=>x.id===id);if(!g)return;document.getElementById('edit-game-notes').value=g.note||'';populateSeasonSelect('edit-game-season',g.seasonId||'');const rows=g.scores.map(s=>{const p=state.players.find(x=>x.id===s.playerId);if(!p)return'';return'<div class="edit-score-row"><span style="font-size:18px;flex-shrink:0;">'+p.emoji+'</span><span class="edit-score-name">'+esc(p.name)+'</span><input type="number" class="edit-score-input" id="escore-'+s.playerId+'" value="'+(s.score!==null?s.score:'')+'" placeholder="—" min="0"></div>';}).join('');document.getElementById('edit-game-scores').innerHTML=rows||'<p class="hint">No scores.</p>';document.getElementById('edit-game-modal').classList.add('open');}
 function saveEditGame(){const g=state.games.find(x=>x.id===editingGameId);if(!g)return;g.scores.forEach(s=>{const el=document.getElementById('escore-'+s.playerId);if(el&&el.value!=='')s.score=parseInt(el.value);});g.note=document.getElementById('edit-game-notes').value.trim();g.seasonId=document.getElementById('edit-game-season').value||'';save();closeModal('edit-game-modal');renderHistory();}
 function confirmDeleteGame(id){delGamePendId=id;document.getElementById('confirm-game-modal').classList.add('open');document.getElementById('confirm-game-del-btn').onclick=()=>{state.games=state.games.filter(g=>g.id!==delGamePendId);save();closeModal('confirm-game-modal');renderHistory();};}
 function renderSeasons(){
-  const el=document.getElementById('seasons-list');
-  if(!state.seasons.length){el.innerHTML='<div class="empty"><span class="empty-icon">🏅</span>No events yet. Create a season to group your games — Christmas tournament, Tuesday League, or whatever you like!</div>';return;}
-  el.innerHTML=state.seasons.map(s=>{const games=state.games.filter(g=>g.seasonId===s.id),stats=getStats(s.id),leader=stats.find(p=>p.wins>0);return'<div class="season-item" onclick="setSeasonFilter(&apos;"+s.id+"&apos;);showPage(&apos;rankings&apos;);"><span style="font-size:28px;">'+s.emoji+'</span><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:15px;">'+esc(s.name)+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px;">'+games.length+' game'+(games.length!==1?'s':'')+(leader?' · '+leader.emoji+' '+esc(leader.name)+' leads':'')+'</div>'+(s.desc?'<div style="font-size:11px;color:var(--text3);margin-top:1px;">'+esc(s.desc)+'</div>':'')+'</div><div style="display:flex;gap:6px;"><button class="btn btn-secondary btn-sm btn-icon-circle" onclick="event.stopPropagation();openSeasonModal(&apos;"+s.id+"&apos;)">✏️</button><button class="btn btn-danger btn-sm btn-icon-circle" onclick="event.stopPropagation();deleteSeason(&apos;"+s.id+"&apos;)">🗑</button></div></div>';}).join('');
+  var el=document.getElementById('seasons-list');
+  if(!state.seasons.length){el.innerHTML='<div class="empty"><span class="empty-icon">🏅</span>No events yet. Create a season to group your games!</div>';return;}
+  el.innerHTML=state.seasons.map(function(s){
+    var games=state.games.filter(function(g){return g.seasonId===s.id;});
+    var stats=getStats(s.id);
+    var leader=stats.find(function(p){return p.wins>0;});
+    var onclick_main="setSeasonFilter("+s.id+");showPage('rankings');";
+    return '<div class="season-item" onclick="'+onclick_main+'">'
+      +'<span style="font-size:28px;">'+s.emoji+'</span>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-weight:700;font-size:15px;">'+esc(s.name)+'</div>'
+      +'<div style="font-size:12px;color:var(--text2);margin-top:2px;">'
+      +games.length+' game'+(games.length!==1?'s':'')
+      +(leader?' · '+leader.emoji+' '+esc(leader.name)+' leads':'')
+      +'</div>'
+      +(s.desc?'<div style="font-size:11px;color:var(--text3);margin-top:1px;">'+esc(s.desc)+'</div>':'')
+      +'</div>'
+      +'<div style="display:flex;gap:6px;">'
+      +'<button class="btn btn-secondary btn-sm btn-icon-circle" onclick="event.stopPropagation();openSeasonModal('+s.id+')">✏️</button>'
+      +'<button class="btn btn-danger btn-sm btn-icon-circle" onclick="event.stopPropagation();deleteSeason('+s.id+')">🗑</button>'
+      +'</div></div>';
+  }).join('');
 }
+
 function populateSeasonSelect(elId,val){const el=document.getElementById(elId);if(!el)return;el.innerHTML='<option value="">— No event —</option>'+state.seasons.map(s=>'<option value="'+s.id+'">'+s.emoji+' '+esc(s.name)+'</option>').join('');el.value=val||'';}
 function openSeasonModal(id){editingSeasonId=id||null;const s=id?state.seasons.find(x=>x.id===id):null;selSeasonEmoji=s?.emoji||'🏆';document.getElementById('season-modal-title').textContent=id?'Edit Event':'New Event';document.getElementById('season-name-input').value=s?.name||'';document.getElementById('season-desc-input').value=s?.desc||'';renderSeasonEmojiRow();document.getElementById('season-modal').classList.add('open');setTimeout(()=>document.getElementById('season-name-input').focus(),80);}
 function closeSeasonModal(){closeModal('season-modal');}
-function renderSeasonEmojiRow(){document.getElementById('season-emoji-row').innerHTML=SEMOJIS.map(e=>'<span onclick="selSeasonEmoji=&apos;"+e+"&apos;;renderSeasonEmojiRow();" style="font-size:24px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid '+(e===selSeasonEmoji?'var(--ga)':'transparent')+';background:'+(e===selSeasonEmoji?'rgba(233,69,96,.12)':'var(--surface2)')+';transition:all .14s;">'+e+'</span>').join('');}
+function renderSeasonEmojiRow(){document.getElementById('season-emoji-row').innerHTML=SEMOJIS.map(e=>'<span data-semoji="'+encodeURIComponent(e)+'" onclick="selSeasonEmoji=decodeURIComponent(this.dataset.semoji);renderSeasonEmojiRow();" style="font-size:24px;cursor:pointer;padding:5px;border-radius:6px;border:2px solid '+(e===selSeasonEmoji?'var(--ga)':'transparent')+';background:'+(e===selSeasonEmoji?'rgba(233,69,96,.12)':'var(--surface2)')+';transition:all .14s;">'+e+'</span>').join('');}
 function saveSeason(){const name=document.getElementById('season-name-input').value.trim();if(!name){showToast('Enter a name!');return;}const desc=document.getElementById('season-desc-input').value.trim();if(editingSeasonId){const s=state.seasons.find(x=>x.id===editingSeasonId);if(s){s.name=name;s.emoji=selSeasonEmoji;s.desc=desc;}}else{state.seasons.push({id:Date.now().toString(),name,emoji:selSeasonEmoji,desc});}save();closeSeasonModal();renderSeasons();}
 function deleteSeason(id){if(!confirm('Delete this event? Games tagged to it keep their scores.'))return;state.seasons=state.seasons.filter(s=>s.id!==id);state.games.forEach(g=>{if(g.seasonId===id)g.seasonId='';});if(activeSeasonFilter===id)activeSeasonFilter='all';save();renderSeasons();renderSeasonBar();}
 function openProfile(pid){profPid=pid;const p=state.players.find(x=>x.id===pid);if(!p)return;const s=getStats().find(x=>x.id===pid)||{};document.getElementById('prof-emoji').textContent=p.emoji;document.getElementById('prof-name').textContent=p.name;document.getElementById('prof-sub').textContent=(s.games||0)+' games played';profTab('stats');document.getElementById('profile-modal').classList.add('open');}
@@ -608,7 +671,7 @@ function confirmResetAll(){document.getElementById('confirm-reset-modal').classL
 function doResetAll(){state={players:[],games:[],seasons:[]};save();closeModal('confirm-reset-modal');activeSeasonFilter='all';showPage('rankings');}
 function openPlayerModal(id){editingPid=id||null;selEmoji=id?(state.players.find(p=>p.id===id)?.emoji||'😀'):'😀';document.getElementById('modal-title').textContent=id?'Edit Player':'New Player';document.getElementById('pname-input').value=id?(state.players.find(p=>p.id===id)?.name||''):'';renderEmojiGrid();document.getElementById('player-modal').classList.add('open');setTimeout(()=>document.getElementById('pname-input').focus(),80);}
 function closePlayerModal(){closeModal('player-modal');}
-function renderEmojiGrid(){document.getElementById('emoji-grid').innerHTML=EMOJIS.map(e=>'<button class="emoji-btn '+(e===selEmoji?'selected':'')+'" onclick="selE(&apos;"+e+"&apos;)">'+e+'</button>').join('');}
+function renderEmojiGrid(){document.getElementById('emoji-grid').innerHTML=EMOJIS.map((e,i)=>'<button class="emoji-btn '+(e===selEmoji?'selected':'')+'" onclick="selE(EMOJIS['+i+'])">'+e+'</button>').join('');}
 function selE(e){selEmoji=e;renderEmojiGrid();}
 function savePlayer(){const name=document.getElementById('pname-input').value.trim();if(!name){showToast('Enter a name!');return;}if(editingPid){const p=state.players.find(x=>x.id===editingPid);if(p){p.name=name;p.emoji=selEmoji;}}else state.players.push({id:Date.now().toString(),name,emoji:selEmoji});save();closePlayerModal();renderPlayers();}
 function confirmDelete(id){delPendId=id;document.getElementById('confirm-modal').classList.add('open');document.getElementById('confirm-del-btn').onclick=doDelete;}
@@ -836,6 +899,9 @@ function isVisible(el) {
   const r = el.getBoundingClientRect();
   return r.width > 0 && r.height > 0 && r.top < window.innerHeight && r.bottom > 0;
 }
+
+
+
 
 </script>
 </body>
