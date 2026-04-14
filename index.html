@@ -217,6 +217,22 @@ label:first-child{margin-top:0;}
 .tut-highlight{outline:2.5px solid #a855f7 !important;outline-offset:4px;border-radius:10px;}
 #tut-bubble{pointer-events:all;}
 #tut-overlay{pointer-events:all;}
+
+/* Leaderboard category tabs */
+.lb-tabs{display:flex;gap:4px;margin-bottom:1rem;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
+.lb-tabs::-webkit-scrollbar{height:0;}
+.lb-tab{padding:.38rem .85rem;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .18s;flex-shrink:0;}
+.lb-tab.active{background:var(--grd);border-color:transparent;color:#fff;}
+.cat-row{display:flex;align-items:center;gap:12px;padding:.85rem 1rem;background:var(--surface);border-radius:var(--rsm);margin-bottom:.5rem;border:1px solid var(--border);position:relative;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;}
+.cat-row:hover{border-color:var(--border2);transform:translateY(-1px);}
+.cat-rank{font-size:19px;width:28px;text-align:center;flex-shrink:0;font-weight:700;}
+.cat-av{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--surface3);border-radius:50%;flex-shrink:0;font-size:18px;border:1.5px solid var(--border2);}
+.cat-info{flex:1;min-width:0;}
+.cat-name{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cat-sub{font-size:11px;color:var(--text2);margin-top:1px;}
+.cat-val{font-size:22px;font-weight:800;letter-spacing:-.5px;flex-shrink:0;text-align:right;}
+.cat-valsub{font-size:10px;color:var(--text2);text-align:right;font-weight:600;letter-spacing:.5px;}
+.cat-bar{position:absolute;left:0;top:0;bottom:0;opacity:.05;pointer-events:none;}
 </style>
 </head>
 <body>
@@ -243,7 +259,7 @@ label:first-child{margin-top:0;}
   <div id="monthly-summary"></div>
   <div class="stat-strip"><div class="sbox"><div class="snum" id="stat-games">0</div><div class="slabel">Games</div></div><div class="sbox"><div class="snum" id="stat-players">0</div><div class="slabel">Players</div></div><div class="sbox"><div class="snum" id="stat-hi">—</div><div class="slabel">Best Score</div></div><div class="sbox"><div class="snum" id="stat-yz">0</div><div class="slabel">🎯 Yahtzees</div></div></div>
   <div class="season-bar" id="rankings-season-bar"></div>
-  <div class="st">Rankings</div>
+  <div class="lb-tabs" id="lb-tabs"></div>
   <div id="lb-list"></div>
 </div>
 <div class="page" id="page-players">
@@ -334,6 +350,7 @@ let editingPid=null,selEmoji='😀',delPendId=null,profPid=null,lightMode=false;
 let gYahtzees={},lastGamePlayers=[],selectedPids=new Set();
 let editingGameId=null,delGamePendId=null,editingSeasonId=null,selSeasonEmoji='🏆';
 let activeSeasonFilter='all';
+let lbTab='wins';
 
 function save(){localStorage.setItem('yahtzee_v3',JSON.stringify(state));}
 function load(){
@@ -388,6 +405,84 @@ function getStats(sid){
     return{...p,games:sc.length,wins,p2nd:p2,p3rd:p3,avg,best,worst,totalYz,maxYzG,curStreak:cur,maxStreak:max};
   }).sort((a,b)=>b.wins-a.wins||b.avg-a.avg);
 }
+function getExtStats(sid){
+  var games=fGames(sid);
+  return state.players.map(function(p){
+    var sc=games.flatMap(function(g){return g.scores.filter(function(s){return s.playerId===p.id&&s.score!==null;}).map(function(s){return s.score;});});
+    var uppers=games.flatMap(function(g){return g.scores.filter(function(s){return s.playerId===p.id&&s.upper!==null;}).map(function(s){return s.upper;});});
+    var lowers=games.flatMap(function(g){return g.scores.filter(function(s){return s.playerId===p.id&&s.lower!==null;}).map(function(s){return s.lower;});});
+    var wins=games.filter(function(g){var v=g.scores.filter(function(s){return s.score!==null;});if(!v.length)return false;return v.slice().sort(function(a,b){return b.score-a.score;})[0]?.playerId===p.id;}).length;
+    var totalYz=games.reduce(function(a,g){var s=g.scores.find(function(s){return s.playerId===p.id;});return a+(s?s.yahtzees:0);},0);
+    var maxYzG=games.reduce(function(mx,g){var s=g.scores.find(function(s){return s.playerId===p.id;});return s&&s.yahtzees>mx?s.yahtzees:mx;},0);
+    var avg=sc.length?Math.round(sc.reduce(function(a,b){return a+b;},0)/sc.length):0;
+    var best=sc.length?Math.max.apply(null,sc):0;
+    var avgUpper=uppers.length?Math.round(uppers.reduce(function(a,b){return a+b;},0)/uppers.length):0;
+    var bestUpper=uppers.length?Math.max.apply(null,uppers):0;
+    var avgLower=lowers.length?Math.round(lowers.reduce(function(a,b){return a+b;},0)/lowers.length):0;
+    var bestLower=lowers.length?Math.max.apply(null,lowers):0;
+    var winRate=sc.length?Math.round((wins/sc.length)*100):0;
+    var p2=0,p3=0;
+    games.forEach(function(g){var v=g.scores.filter(function(s){return s.score!==null;}).slice().sort(function(a,b){return b.score-a.score;});if(v[1]?.playerId===p.id)p2++;if(v[2]?.playerId===p.id)p3++;});
+    var chrono=games.slice().reverse().filter(function(g){return g.scores.some(function(s){return s.playerId===p.id&&s.score!==null;});});
+    var cur=0,maxStreak=0,run=0;
+    chrono.forEach(function(g,i){var v=g.scores.filter(function(s){return s.score!==null;});var won=v.slice().sort(function(a,b){return b.score-a.score;})[0]?.playerId===p.id;if(won){run++;if(run>maxStreak)maxStreak=run;}else run=0;if(i===chrono.length-1)cur=run;});
+    return{id:p.id,name:p.name,emoji:p.emoji,games:sc.length,wins,p2nd:p2,p3rd:p3,avg,best,avgUpper,bestUpper,avgLower,bestLower,totalYz,maxYzG,winRate,curStreak:cur,maxStreak};
+  }).filter(function(p){return p.games>0;});
+}
+function getTabConfig(){
+  return [
+    {id:'wins',     label:'🏆 Wins',        val:function(p){return p.wins;},      sub:function(p){return p.games+' games · avg '+p.avg;}, unit:'wins'},
+    {id:'avg',      label:'📊 Avg Score',   val:function(p){return p.avg;},       sub:function(p){return 'best '+p.best+' · '+p.games+' games';}, unit:'avg'},
+    {id:'best',     label:'⭐ Best Score',  val:function(p){return p.best;},      sub:function(p){return 'avg '+p.avg+' · '+p.games+' games';}, unit:'pts'},
+    {id:'totalYz',  label:'🎯 Yahtzees',    val:function(p){return p.totalYz;},   sub:function(p){return 'best single game: '+p.maxYzG;}, unit:'total'},
+    {id:'maxYzG',   label:'🎯 Most in Game',val:function(p){return p.maxYzG;},    sub:function(p){return p.totalYz+' total Yahtzees';}, unit:'in 1 game'},
+    {id:'bestUpper',label:'⬆️ Best Upper',  val:function(p){return p.bestUpper;}, sub:function(p){return 'avg upper '+p.avgUpper;}, unit:'pts'},
+    {id:'avgUpper', label:'⬆️ Avg Upper',   val:function(p){return p.avgUpper;},  sub:function(p){return 'best '+p.bestUpper;}, unit:'avg'},
+    {id:'bestLower',label:'⬇️ Best Lower',  val:function(p){return p.bestLower;}, sub:function(p){return 'avg lower '+p.avgLower;}, unit:'pts'},
+    {id:'avgLower', label:'⬇️ Avg Lower',   val:function(p){return p.avgLower;},  sub:function(p){return 'best '+p.bestLower;}, unit:'avg'},
+    {id:'winRate',  label:'📈 Win Rate',    val:function(p){return p.winRate;},   sub:function(p){return p.wins+' wins from '+p.games+' games';}, unit:'%'},
+    {id:'maxStreak',label:'🔥 Best Streak', val:function(p){return p.maxStreak;}, sub:function(p){return 'current streak: '+p.curStreak;}, unit:'wins'},
+    {id:'curStreak',label:'⚡ Hot Streak',  val:function(p){return p.curStreak;}, sub:function(p){return 'best ever: '+p.maxStreak;}, unit:'now'},
+    {id:'p2nd',     label:'🥈 2nd Places',  val:function(p){return p.p2nd;},      sub:function(p){return p.wins+' wins · '+p.p3rd+' thirds';}, unit:'times'},
+  ];
+}
+function renderLbTabs(){
+  var tabs=getTabConfig();
+  var el=document.getElementById('lb-tabs');
+  el.innerHTML=tabs.map(function(t){
+    return '<span class="lb-tab'+(lbTab===t.id?' active':'')+'" data-lbtab="'+t.id+'">'+t.label+'</span>';
+  }).join('');
+  el.querySelectorAll('[data-lbtab]').forEach(function(b){
+    b.onclick=function(){lbTab=b.dataset.lbtab;renderLbTabs();renderLeaderboard();};
+  });
+}
+function renderCategoryBoard(stats,cfg){
+  var sorted=stats.slice().sort(function(a,b){return cfg.val(b)-cfg.val(a);});
+  var maxVal=cfg.val(sorted[0])||1;
+  var el=document.getElementById('lb-list');
+  if(!sorted.length){el.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text2);font-size:13px;">No data yet!</div>';return;}
+  var colors=['var(--gold)','var(--silver)','var(--bronze)','var(--ga)'];
+  el.innerHTML=sorted.map(function(p,i){
+    var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    var barC=colors[Math.min(i,3)];
+    var v=cfg.val(p);
+    var barW=maxVal?Math.round((v/maxVal)*100):0;
+    return '<div class="cat-row lbrow" data-pid="'+p.id+'">'
+      +'<div class="cat-bar" style="width:'+barW+'%;background:'+barC+';"></div>'
+      +'<div class="cat-rank">'+medal+'</div>'
+      +'<div class="cat-av">'+p.emoji+'</div>'
+      +'<div class="cat-info">'
+      +'<div class="cat-name">'+esc(p.name)+'</div>'
+      +'<div class="cat-sub">'+cfg.sub(p)+'</div>'
+      +'</div>'
+      +'<div>'
+      +'<div class="cat-val" style="color:'+barC+'">'+v+'</div>'
+      +'<div class="cat-valsub">'+cfg.unit+'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+  el.querySelectorAll('.lbrow').forEach(function(r){r.onclick=function(){openProfile(r.dataset.pid);};});
+}
 function getHistory(pid){
   return state.games.filter(g=>g.scores.some(s=>s.playerId===pid&&s.score!==null)).map(g=>g.scores.find(s=>s.playerId===pid).score).reverse();
 }
@@ -415,9 +510,15 @@ function renderSeasonBar(){
 }
 
 function setSeasonFilter(id){activeSeasonFilter=id;renderSeasonBar();renderLeaderboard();}
-function renderRankings(){renderMonthlySummary();renderSeasonBar();renderLeaderboard();}
+function renderRankings(){renderMonthlySummary();renderSeasonBar();renderLbTabs();renderLeaderboard();}
 function renderLeaderboard(){
   const sid=activeSeasonFilter==='all'?null:activeSeasonFilter;
+  if(lbTab!=='wins'){
+    var ext=getExtStats(sid);
+    var tabs=getTabConfig();
+    var cfg=tabs.find(function(t){return t.id===lbTab;});
+    if(cfg){renderCategoryBoard(ext,cfg);return;}
+  }
   const ranked=getStats(sid);
   const games=fGames(sid);
   const allSc=games.flatMap(g=>g.scores.filter(s=>s.score!==null).map(s=>s.score));
@@ -628,8 +729,72 @@ function renderHistory(){
   });
 }
 
-function openEditGame(id){editingGameId=id;const g=state.games.find(x=>x.id===id);if(!g)return;document.getElementById('edit-game-notes').value=g.note||'';populateSeasonSelect('edit-game-season',g.seasonId||'');const rows=g.scores.map(s=>{const p=state.players.find(x=>x.id===s.playerId);if(!p)return'';return'<div class="edit-score-row"><span style="font-size:18px;flex-shrink:0;">'+p.emoji+'</span><span class="edit-score-name">'+esc(p.name)+'</span><input type="number" class="edit-score-input" id="escore-'+s.playerId+'" value="'+(s.score!==null?s.score:'')+'" placeholder="—" min="0"></div>';}).join('');document.getElementById('edit-game-scores').innerHTML=rows||'<p class="hint">No scores.</p>';document.getElementById('edit-game-modal').classList.add('open');}
-function saveEditGame(){const g=state.games.find(x=>x.id===editingGameId);if(!g)return;g.scores.forEach(s=>{const el=document.getElementById('escore-'+s.playerId);if(el&&el.value!=='')s.score=parseInt(el.value);});g.note=document.getElementById('edit-game-notes').value.trim();g.seasonId=document.getElementById('edit-game-season').value||'';save();closeModal('edit-game-modal');renderHistory();}
+function openEditGame(id){
+  editingGameId=id;
+  var g=state.games.find(function(x){return x.id===id;});
+  if(!g)return;
+  document.getElementById('edit-game-notes').value=g.note||'';
+  populateSeasonSelect('edit-game-season',g.seasonId||'');
+  var rows=g.scores.map(function(s){
+    var p=state.players.find(function(x){return x.id===s.playerId;});
+    if(!p)return'';
+    var uv=s.upper!==null&&s.upper!==undefined?s.upper:'';
+    var lv=s.lower!==null&&s.lower!==undefined?s.lower:'';
+    var yv=s.yahtzees||0;
+    var tot=(parseInt(uv)||0)+(parseInt(lv)||0);
+    return '<div class="edit-score-row" style="flex-direction:column;align-items:stretch;gap:8px;">'
+      +'<div style="display:flex;align-items:center;gap:8px;">'
+      +'<span style="font-size:20px;flex-shrink:0;">'+p.emoji+'</span>'
+      +'<span class="edit-score-name" style="font-size:14px;font-weight:700;">'+esc(p.name)+'</span>'
+      +'<span class="edit-tot-display" id="etot-'+s.playerId+'" style="margin-left:auto;font-size:16px;font-weight:800;background:linear-gradient(135deg,#fbbf24,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">'+(uv===''&&lv===''?'—':tot)+'</span>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">'
+      +'<div style="display:flex;flex-direction:column;gap:3px;">'
+      +'<span style="font-size:10px;color:var(--text2);font-weight:600;">Upper</span>'
+      +'<input type="number" class="edit-score-input esupper" data-pid="'+s.playerId+'" value="'+uv+'" placeholder="—" min="0" max="105" style="width:100%;">'
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:3px;">'
+      +'<span style="font-size:10px;color:var(--text2);font-weight:600;">Lower</span>'
+      +'<input type="number" class="edit-score-input eslower" data-pid="'+s.playerId+'" value="'+lv+'" placeholder="—" min="0" max="1470" style="width:100%;">'
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:3px;">'
+      +'<span style="font-size:10px;color:var(--text2);font-weight:600;">🎯 Yahtzees</span>'
+      +'<input type="number" class="edit-score-input esyahtzee" data-pid="'+s.playerId+'" value="'+yv+'" placeholder="0" min="0" max="10" style="width:100%;">'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+  var cont=document.getElementById('edit-game-scores');
+  cont.innerHTML=rows||'<p class="hint">No scores.</p>';
+  // Wire up live total calculation
+  cont.querySelectorAll('.esupper,.eslower').forEach(function(inp){
+    inp.oninput=function(){
+      var pid=inp.dataset.pid;
+      var row=cont.querySelector('[id="etot-'+pid+'"]');
+      var u=cont.querySelector('.esupper[data-pid="'+pid+'"]').value;
+      var l=cont.querySelector('.eslower[data-pid="'+pid+'"]').value;
+      if(row)row.textContent=(u===''&&l==='')?'—':(parseInt(u||0)+parseInt(l||0));
+    };
+  });
+  document.getElementById('edit-game-modal').classList.add('open');
+}
+function saveEditGame(){
+  var g=state.games.find(function(x){return x.id===editingGameId;});
+  if(!g)return;
+  var cont=document.getElementById('edit-game-scores');
+  g.scores.forEach(function(s){
+    var uEl=cont.querySelector('.esupper[data-pid="'+s.playerId+'"]');
+    var lEl=cont.querySelector('.eslower[data-pid="'+s.playerId+'"]');
+    var yEl=cont.querySelector('.esyahtzee[data-pid="'+s.playerId+'"]');
+    if(uEl!==null)s.upper=uEl.value!==''?parseInt(uEl.value):null;
+    if(lEl!==null)s.lower=lEl.value!==''?parseInt(lEl.value):null;
+    if(yEl!==null)s.yahtzees=yEl.value!==''?parseInt(yEl.value):0;
+    s.score=(s.upper||0)+(s.lower||0);
+  });
+  g.note=document.getElementById('edit-game-notes').value.trim();
+  g.seasonId=document.getElementById('edit-game-season').value||'';
+  save();closeModal('edit-game-modal');renderHistory();
+}
 function confirmDeleteGame(id){delGamePendId=id;document.getElementById('confirm-game-modal').classList.add('open');document.getElementById('confirm-game-del-btn').onclick=()=>{state.games=state.games.filter(g=>g.id!==delGamePendId);save();closeModal('confirm-game-modal');renderHistory();};}
 function renderSeasons(){
   var el=document.getElementById('seasons-list');
