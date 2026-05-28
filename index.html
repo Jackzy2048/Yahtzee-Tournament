@@ -484,7 +484,7 @@ function renderCategoryBoard(stats,cfg){
   el.querySelectorAll('.lbrow').forEach(function(r){r.onclick=function(){openProfile(r.dataset.pid);};});
 }
 function getHistory(pid){
-  return state.games.filter(g=>g.scores.some(s=>s.playerId===pid&&s.score!==null)).map(g=>g.scores.find(s=>s.playerId===pid).score).reverse();
+  return state.games.filter(g=>g.scores.some(s=>s.playerId===pid&&s.score!==null)).map(g=>g.scores.find(s=>s.playerId===pid).score);
 }
 function renderMonthlySummary(){
   const el=document.getElementById('monthly-summary');
@@ -505,7 +505,7 @@ function renderSeasonBar(){
   var pills=[{id:'all',label:'All time',emoji:''}].concat(state.seasons.map(function(s){return{id:s.id,label:s.name,emoji:s.emoji};}));
   bar.innerHTML=pills.map(function(p){
     var active=activeSeasonFilter===p.id?'active':'';
-    return '<span class="season-pill '+active+'" onclick="setSeasonFilter('+p.id+')">'+(p.emoji?p.emoji+' ':'')+esc(p.label)+'</span>';
+    return '<span class="season-pill '+active+'" onclick="setSeasonFilter(\''+p.id+'\')">'+(p.emoji?p.emoji+' ':'')+esc(p.label)+'</span>';
   }).join('');
 }
 
@@ -539,7 +539,7 @@ function renderLeaderboard(){
     const yz=p.totalYz>0?'<span class="badge byahtzee">🎯 '+p.totalYz+'</span>':'';
     const pod=(p.p2nd>0||p.p3rd>0)?'<span class="badge bpodium">🥈×'+p.p2nd+' 🥉×'+p.p3rd+'</span>':'';
     const sub=(fire||yz||pod)?'<div class="bdgs">'+fire+yz+pod+'</div>':'<div class="lb-sub">'+p.games+' game'+(p.games!==1?'s':'')+' · avg '+p.avg+' · best '+p.best+'</div>';
-    return'<div class="lb-row'+(i===0&&p.wins>0?' first-row':'')+'" onclick="openProfile("+p.id+")">'
+    return'<div class="lb-row'+(i===0&&p.wins>0?' first-row':'')+'" onclick="openProfile(\''+p.id+'\')">'
       +'<div class="lb-bar" style="width:'+(p.wins?Math.round((p.wins/maxW)*100):0)+'%;background:'+barC+';"></div>'
       +'<div class="lb-glow"></div>'
       +'<div class="lb-rank">'+medal+'</div>'
@@ -590,7 +590,7 @@ function renderGamePage(pre){
   renderPlayerSelect();populateSeasonSelect('game-season-select','');
 }
 function quickStart(){if(!lastGamePlayers.length)return;selectedPids=new Set(lastGamePlayers.filter(id=>state.players.find(p=>p.id===id)));goToStep2();}
-function renderPlayerSelect(){document.getElementById('player-select-grid').innerHTML=state.players.map(p=>{const sel=selectedPids.has(p.id);return'<div class="ps-row'+(sel?' selected':'')+'" onclick="togglePS(\"+p.id+\")">'+'<div class="ps-check">'+(sel?'✓':'')+'</div><div class="pav" style="width:36px;height:36px;font-size:19px;">'+p.emoji+'</div><span style="font-size:14px;font-weight:600;">'+esc(p.name)+'</span></div>';}).join('');}
+function renderPlayerSelect(){document.getElementById('player-select-grid').innerHTML=state.players.map(p=>{const sel=selectedPids.has(p.id);return'<div class="ps-row'+(sel?' selected':'')+'" onclick="togglePS(\''+p.id+'\')">'+'<div class="ps-check">'+(sel?'✓':'')+'</div><div class="pav" style="width:36px;height:36px;font-size:19px;">'+p.emoji+'</div><span style="font-size:14px;font-weight:600;">'+esc(p.name)+'</span></div>';}).join('');}
 function togglePS(pid){if(selectedPids.has(pid))selectedPids.delete(pid);else selectedPids.add(pid);renderPlayerSelect();}
 function goToStep2(){
   if(selectedPids.size===0){showToast('Select at least one player!');return;}
@@ -803,7 +803,7 @@ function renderSeasons(){
     var games=state.games.filter(function(g){return g.seasonId===s.id;});
     var stats=getStats(s.id);
     var leader=stats.find(function(p){return p.wins>0;});
-    var onclick_main="setSeasonFilter("+s.id+");showPage('rankings');";
+    var onclick_main="setSeasonFilter('"+s.id+"');showPage('rankings');";
     return '<div class="season-item" onclick="'+onclick_main+'">'
       +'<span style="font-size:28px;">'+s.emoji+'</span>'
       +'<div style="flex:1;min-width:0;">'
